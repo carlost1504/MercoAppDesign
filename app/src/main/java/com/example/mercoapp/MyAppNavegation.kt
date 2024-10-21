@@ -10,11 +10,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
-import com.example.mercoapp.pages.HomePage
-import com.example.mercoapp.pages.LoginPage
-import com.example.mercoapp.pages.SignupPageBuyer
-import com.example.mercoapp.pages.SignupPageSeller
-import com.example.mercoapp.pages.TypeUserSignup
+import com.example.mercoapp.ui.pages.HomePage
+import com.example.mercoapp.ui.pages.LoginPage
+import com.example.mercoapp.ui.pages.MercoInit
+import com.example.mercoapp.ui.pages.SignupPageBuyer
+import com.example.mercoapp.ui.pages.SignupPageSeller
+import com.example.mercoapp.ui.pages.TypeUserSignup
 import androidx.compose.ui.tooling.preview.Preview as Preview1
 
 
@@ -24,7 +25,11 @@ import androidx.compose.ui.tooling.preview.Preview as Preview1
 fun MyAppNavegation(modifier: Modifier=Modifier, authViewModel: AuthViewModel){
     val navController= rememberNavController()
 
-    NavHost(navController= navController, startDestination = "login", builder = {
+    NavHost(navController= navController, startDestination = "mercoInit", builder = {
+
+        composable("mercoInit"){
+            MercoInit(modifier,navController,authViewModel)
+        }
         composable("login"){
             LoginPage(modifier,navController,authViewModel)
         }
@@ -37,7 +42,6 @@ fun MyAppNavegation(modifier: Modifier=Modifier, authViewModel: AuthViewModel){
         composable("signupSeller"){
             SignupPageSeller(modifier,navController,authViewModel)//
         }
-
         composable("home"){
             HomePage(modifier,navController,authViewModel)
         }

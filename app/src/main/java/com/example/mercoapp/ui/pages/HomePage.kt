@@ -1,4 +1,4 @@
-package com.example.mercoapp.pages
+package com.example.mercoapp.ui.pages
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
