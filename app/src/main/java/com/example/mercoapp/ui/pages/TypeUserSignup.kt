@@ -45,8 +45,7 @@ import com.example.mercoapp.ui.components.Header
 @Composable
 fun TypeUserSignup(
     modifier: Modifier = Modifier,
-    navController: NavController?,
-    authViewModel: AuthViewModel?
+    navController: NavController?
 ) {
     Column(
         modifier = modifier
@@ -89,8 +88,7 @@ fun TypeUserSignup(
 @Composable
 fun TypeUserSignupPreview() {
     TypeUserSignup(
-        navController = null,
-        authViewModel = null
+        navController = null
     )
 }
 

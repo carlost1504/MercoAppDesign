@@ -11,11 +11,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -29,8 +31,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.mercoapp.AuthViewModel
+import androidx.navigation.compose.rememberNavController
+import com.example.mercoapp.viewModel.AuthViewModel
 import com.example.mercoapp.R
 import com.example.mercoapp.ui.components.ActionButton
 import com.example.mercoapp.ui.components.CustomTextField
@@ -40,7 +45,13 @@ import com.example.mercoapp.ui.components.Header
 
 
 @Composable
-fun LoginPage(modifier: Modifier = Modifier, navController: NavController?, authViewModel: AuthViewModel?) {
+fun LoginPage(
+    modifier: Modifier = Modifier,
+    navController: NavController?,
+    authViewModel: AuthViewModel = viewModel()// Se conecta al AuthViewModel
+) {
+    val authState by authViewModel.authState.observeAsState(0) // Observar el estado de autenticación
+
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
 
@@ -96,11 +107,22 @@ fun LoginPage(modifier: Modifier = Modifier, navController: NavController?, auth
 
         Spacer(modifier = Modifier.height(20.dp))
 
+        // Mostrar estado de autenticación
+        when (authState) {
+            1 -> CircularProgressIndicator() // Estado: Cargando
+            2 -> Text(text = "Hubo un error al iniciar sesión, por favor intenta de nuevo") // Estado: Error
+            3 -> {
+                // Estado: Éxito, navegar a la pantalla del perfil
+                navController?.navigate("profile")
+            }
+        }
+
         // Botón de ingreso
         ActionButton(
             text = "Entrar",
             onClick = {
-                // Lógica de inicio de sesión
+                authViewModel.signin(email, password)  // Inicia sesión
+                navController?.navigate("home")
             },
             backgroundColor = redMerco
         )
@@ -124,8 +146,20 @@ fun LoginPage(modifier: Modifier = Modifier, navController: NavController?, auth
 @Preview(showBackground = true)
 @Composable
 fun LoginPagePreview() {
-    // Aquí no necesitas pasar navController ni authViewModel para la vista previa
-    LoginPage(navController = null, authViewModel = null)
+    // Crear un NavController simulado para la vista previa
+    val navController = rememberNavController()
+
+    // Crear una versión simulada de AuthViewModel con estados predefinidos
+    val fakeAuthViewModel = object : AuthViewModel() {
+        // Para la vista previa, devolveremos un estado predeterminado
+        override val authState = MutableLiveData(0)
+    }
+
+    // Llamamos a LoginPage pasando los valores simulados
+    LoginPage(
+        navController = navController,
+        authViewModel = fakeAuthViewModel
+    )
 }
 
 

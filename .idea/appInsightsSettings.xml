@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.mercoapp" />
+                  <option name="mobileSdkAppId" value="1:661604734928:android:185a791225ab5dcbbb8bd5" />
+                  <option name="projectId" value="mercoapp-c0d0f" />
+                  <option name="projectNumber" value="661604734928" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
