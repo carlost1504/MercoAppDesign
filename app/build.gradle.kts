@@ -52,6 +52,9 @@ android {
 
 dependencies {
 
+    implementation ("com.google.android.gms:play-services-base:VERSION")
+
+
     // Versión de Material Design para Compose
     implementation("androidx.compose.material:material:1.4.3")
 

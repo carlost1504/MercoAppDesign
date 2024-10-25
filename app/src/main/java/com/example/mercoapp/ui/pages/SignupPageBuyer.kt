@@ -28,6 +28,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.mercoapp.domain.model.UserBuyer
+import com.example.mercoapp.service.UserServices
+import com.example.mercoapp.service.UserServicesImpl
 import com.example.mercoapp.ui.components.ActionButton
 import com.example.mercoapp.ui.components.CustomTextField
 import com.example.mercoapp.ui.components.Header
@@ -35,13 +37,15 @@ import com.example.mercoapp.ui.components.PasswordTextField
 import com.example.mercoapp.ui.components.ProfilePhotoButton
 import com.example.mercoapp.ui.components.DropdownButton
 import com.example.mercoapp.ui.theme.redMerco
+import com.example.mercoapp.viewModel.SignupViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun SignupPageBuyer(
     modifier: Modifier = Modifier,
     navController: NavController?,
-    authViewModel: AuthViewModel = viewModel()
+    authViewModel: AuthViewModel = viewModel(),
+    viewModel: SignupViewModel = viewModel()
 ) {
     val authState by authViewModel.authState.observeAsState(0) // Observamos el estado de autenticación
 
@@ -108,7 +112,7 @@ fun SignupPageBuyer(
             } // Estado: Error
             3 -> item {
                 // Estado: Éxito, navegar a la pantalla de inicio
-                navController?.navigate("home")
+                navController?.navigate("infoUser")
             }
         }
 
@@ -133,9 +137,8 @@ fun SignupPageBuyer(
 
                         // Llamar a la función para registrar comprador
                         authViewModel.signupBuyer(buyer, password)
-                        navController?.navigate("home")
-                        // Guardar en Firestore bajo la colección "users", utilizando el email como ID del documento
-                        FirebaseFirestore.getInstance().collection("users").document(buyer.email).set(buyer)
+                        viewModel.signupBuyer(buyer, password)
+
 
                     }
                 },

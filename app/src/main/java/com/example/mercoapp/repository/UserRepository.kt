@@ -10,7 +10,9 @@ import com.google.firebase.ktx.Firebase
 interface UserRepository {
     suspend fun createBuyer(buyer: UserBuyer)      // Crear un comprador
     suspend fun createSeller(seller: UserSeller)   // Crear un vendedor
-    suspend fun getCurrentUser(): Any?         // Obtener el usuario actual (podría ser Buyer o Seller)
+    suspend fun getCurrentUser(): Any?             // Obtener el usuario actual (podría ser Buyer o Seller)
+    suspend fun getUserById(userId: String): Any?  // Obtener usuario específico por ID
+    suspend fun updateUser(user: Any)              // Actualizar usuario (comprador o vendedor)
 }
 
 class UserRepositoryImpl(
@@ -46,5 +48,24 @@ class UserRepositoryImpl(
             }
         }
     }
+    // Obtener un usuario específico por su ID
+    override suspend fun getUserById(userId: String): Any? {
+        // Primero, buscar en la colección de compradores
+        val buyer = userServices.getBuyerById(userId)
+        if (buyer != null) return buyer
+
+        // Si no es un comprador, buscar en la colección de vendedores
+        val seller = userServices.getSellerById(userId)
+        return seller
+    }
+    // Actualizar la información de un usuario (comprador o vendedor)
+    override suspend fun updateUser(user: Any) {
+        when (user) {
+            is UserBuyer -> userServices.updateBuyer(user)   // Actualizar comprador
+            is UserSeller -> userServices.updateSeller(user) // Actualizar vendedor
+            else -> throw IllegalArgumentException("Tipo de usuario no soportado")
+        }
+    }
+
 }
 

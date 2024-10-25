@@ -11,6 +11,8 @@ interface UserServices {
     suspend fun createSeller(seller: UserSeller)   // Crear un vendedor
     suspend fun getBuyerById(id: String): UserBuyer?  // Obtener comprador por ID
     suspend fun getSellerById(id: String): UserSeller?  // Obtener vendedor por ID
+    suspend fun updateBuyer(buyer: UserBuyer)  // Actualizar comprador en Firestore
+    suspend fun updateSeller(seller: UserSeller)  // Actualizar vendedor en Firestore
 }
 
 class UserServicesImpl : UserServices {
@@ -55,5 +57,21 @@ class UserServicesImpl : UserServices {
 
         // Convertir el documento Firestore en un objeto Seller
         return seller.toObject(UserSeller::class.java)
+    }
+
+    override suspend fun updateBuyer(buyer: UserBuyer) {
+        // Actualizar el documento del comprador en la colección "buyers"
+        Firebase.firestore.collection("buyers")
+            .document(buyer.id)  // Se usa el ID del comprador como ID de documento
+            .set(buyer)
+            .await()  // Si estás usando coroutines para manejar la espera de Firestore
+    }
+
+    override suspend fun updateSeller(seller: UserSeller) {
+        // Actualizar el documento del vendedor en la colección "sellers"
+        Firebase.firestore.collection("sellers")
+            .document(seller.id)  // Se usa el ID del vendedor como ID de documento
+            .set(seller)
+            .await()  // Si estás usando coroutines para manejar la espera de Firestore
     }
 }

@@ -35,6 +35,7 @@ import com.example.mercoapp.ui.components.Header
 import com.example.mercoapp.ui.components.DropdownButton
 import com.example.mercoapp.ui.components.PasswordTextField
 import com.example.mercoapp.ui.components.ProfilePhotoButton
+import com.example.mercoapp.viewModel.SignupViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 
 
@@ -42,7 +43,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 fun SignupPageSeller(
     modifier: Modifier = Modifier,
     navController: NavController?,
-    authViewModel: AuthViewModel = viewModel()
+    authViewModel: AuthViewModel = viewModel(),
+    viewModel: SignupViewModel = viewModel()
 ) {
     val authState by authViewModel.authState.observeAsState(0) // Observamos el estado de autenticación
 
@@ -137,7 +139,7 @@ fun SignupPageSeller(
             } // Estado: Error
             3 -> item {
                 // Estado: Éxito, navegar a la pantalla de inicio
-                navController?.navigate("home")
+                navController?.navigate("infoUser")
             }
         }
 
@@ -223,10 +225,7 @@ fun SignupPageSeller(
 
                         // Llamar a la función para registrar comprador
                         authViewModel.signupSeller(seller, password)
-                        navController?.navigate("home")
-
-                        FirebaseFirestore.getInstance().collection("users").document(seller.email).set(seller)
-                        println("datos enviado"+ seller.id+ " "+seller.name)
+                        viewModel.signupSeller(seller, password)
                     }
                 },
                 backgroundColor = redMerco

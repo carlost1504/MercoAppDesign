@@ -4,14 +4,18 @@ import com.example.mercoapp.domain.model.UserBuyer
 import com.example.mercoapp.domain.model.UserSeller
 import com.example.mercoapp.service.AuthService
 import com.example.mercoapp.service.AuthServiceImpl
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.tasks.await
 
 interface AuthRepository {
     suspend fun signupBuyer(buyer: UserBuyer, password: String)
     suspend fun signupSeller(seller: UserSeller, password: String)
-    suspend fun signin(email: String, password: String)
+    suspend fun signin(email: String, password: String): FirebaseUser? // Cambia el tipo de retorno
+    suspend fun signup(email: String, password: String)
 }
+
 
 class AuthRepositoryImpl(
     private val authService: AuthService = AuthServiceImpl(),
@@ -19,35 +23,30 @@ class AuthRepositoryImpl(
 ) : AuthRepository {
 
     override suspend fun signupBuyer(buyer: UserBuyer, password: String) {
-        // 1. Registro en el módulo de autenticación con Firebase
         authService.createUser(buyer.email, password)
-
-        // 2. Obtenemos el UID del usuario
         val uid = Firebase.auth.currentUser?.uid
-
-        // 3. Guardar el comprador en Firestore
         uid?.let {
-            buyer.id = it // Asignamos el UID al comprador
-            userRepository.createBuyer(buyer) // Guardar el comprador en Firestore
+            buyer.id = it
+            userRepository.createBuyer(buyer)
         }
     }
 
     override suspend fun signupSeller(seller: UserSeller, password: String) {
-        // 1. Registro en el módulo de autenticación con Firebase
         authService.createUser(seller.email, password)
-
-        // 2. Obtenemos el UID del usuario
         val uid = Firebase.auth.currentUser?.uid
-
-        // 3. Guardar el vendedor en Firestore
         uid?.let {
-            seller.id = it // Asignamos el UID al vendedor
-            userRepository.createSeller(seller) // Guardar el vendedor en Firestore
+            seller.id = it
+            userRepository.createSeller(seller)
         }
     }
 
-    override suspend fun signin(email: String, password: String) {
-        // Inicio de sesión con Firebase Authentication
-        authService.loginWithEmailAndPassword(email, password)
+    override suspend fun signup(email: String, password: String) {
+        Firebase.auth.createUserWithEmailAndPassword(email, password).await()
+    }
+
+    // Devuelve FirebaseUser para obtener el UID
+    override suspend fun signin(email: String, password: String): FirebaseUser? {
+        Firebase.auth.signInWithEmailAndPassword(email, password).await()
+        return Firebase.auth.currentUser // Devuelve el usuario autenticado
     }
 }

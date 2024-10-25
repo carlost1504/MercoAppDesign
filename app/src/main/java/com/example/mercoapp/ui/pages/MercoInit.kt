@@ -28,10 +28,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.mercoapp.AuthViewModel
 import com.example.mercoapp.R
 import com.example.mercoapp.ui.components.ActionButton
 import com.example.mercoapp.ui.theme.redMerco
+import com.example.mercoapp.viewModel.AuthViewModel
 
 @Composable
 fun MercoInit(modifier: Modifier = Modifier,navController: NavController?,authViewModel: AuthViewModel?) {

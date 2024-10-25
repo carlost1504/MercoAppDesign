@@ -42,15 +42,18 @@ import com.example.mercoapp.ui.components.CustomTextField
 import com.example.mercoapp.ui.components.PasswordTextField
 import com.example.mercoapp.ui.theme.redMerco
 import com.example.mercoapp.ui.components.Header
+import com.example.mercoapp.viewModel.UserViewModel
 
 
 @Composable
 fun LoginPage(
     modifier: Modifier = Modifier,
     navController: NavController?,
-    authViewModel: AuthViewModel = viewModel()// Se conecta al AuthViewModel
+    authViewModel: AuthViewModel = viewModel(),
+    userViewModel: UserViewModel = viewModel()  // Conecta el UserViewModel para usar después del login
 ) {
-    val authState by authViewModel.authState.observeAsState(0) // Observar el estado de autenticación
+    val authState by authViewModel.authState.observeAsState(0)
+    val userId by authViewModel.userId.observeAsState()
 
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
@@ -58,8 +61,8 @@ fun LoginPage(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp), // Padding lateral
-        verticalArrangement = Arrangement.SpaceBetween, // Distribución de espacio entre los elementos
+            .padding(horizontal = 24.dp),
+        verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Encabezado
@@ -69,16 +72,15 @@ fun LoginPage(
             "mercoInit"
         )
 
-
         Spacer(modifier = Modifier.height(30.dp))
 
         Image(
-            painter = painterResource(id = R.drawable.logo_merco_app), // Coloca aquí tu logo
+            painter = painterResource(id = R.drawable.logo_merco_app),
             contentDescription = "Logo",
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(250.dp)
-                .clip(CircleShape) // Hace que la imagen sea circular
+                .clip(CircleShape)
         )
 
         Column(
@@ -109,20 +111,22 @@ fun LoginPage(
 
         // Mostrar estado de autenticación
         when (authState) {
+            0 -> Spacer(modifier = Modifier.height(16.dp)) // Estado inicial
             1 -> CircularProgressIndicator() // Estado: Cargando
-            2 -> Text(text = "Hubo un error al iniciar sesión, por favor intenta de nuevo") // Estado: Error
+            2 -> Text(text = "Hubo un error al iniciar sesión, por favor intenta de nuevo", color = Color.Red) // Estado: Error
             3 -> {
-                // Estado: Éxito, navegar a la pantalla del perfil
-                navController?.navigate("profile")
+                // Navega a la pantalla del perfil de usuario con el ID del usuario autenticado
+                userId?.let { id ->
+                    userViewModel.getUser(id) // Llama a getUser en UserViewModel para cargar la información
+                    navController?.navigate("infoUser") // Navegar a la pantalla de perfil
+                }
             }
         }
 
-        // Botón de ingreso
         ActionButton(
             text = "Entrar",
             onClick = {
-                authViewModel.signin(email, password)  // Inicia sesión
-                navController?.navigate("home")
+                authViewModel.signin(email, password) // Inicia sesión
             },
             backgroundColor = redMerco
         )

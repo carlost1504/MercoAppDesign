@@ -34,7 +34,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.mercoapp.AuthViewModel
 import com.example.mercoapp.R
 import com.example.mercoapp.ui.theme.redMerco
 import androidx.compose.material.Button

@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.mercoapp.ui.theme.MercoAppTheme
+import com.example.mercoapp.viewModel.AuthViewModel
 
 
 class MainActivity : ComponentActivity() {
@@ -23,7 +24,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MercoAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    MyAppNavegation(modifier = Modifier.padding(innerPadding),authViewModel = authViewModel)
+                    MyAppNavigation(modifier = Modifier.padding(innerPadding),authViewModel = authViewModel,)
                 }
             }
         }
