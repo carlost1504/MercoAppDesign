@@ -23,70 +23,57 @@ class UserViewModel(
     private val _userSeller = MutableLiveData<UserSeller?>()
     val userSeller: LiveData<UserSeller?> = _userSeller
 
-    val userState = MutableLiveData(0)
-
-
-    fun resetUserState() {
-        userState.value = 0
-    }
+    val userState = MutableLiveData(0)  // Estado del usuario (0: idle, 1: loading, 2: error, 3: success)
 
     fun getUser(userId: String) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                Log.d("UserViewModel", "Iniciando carga de usuario con ID: $userId")
-                withContext(Dispatchers.Main) { userState.value = 1 }  // Estado: Loading
+                // Cambia el estado a "loading"
+                withContext(Dispatchers.Main) { userState.value = 1 }
 
+                // Intentamos obtener el usuario de Firebase
                 val fetchedUser = userRepo.getUserById(userId)
-                Log.d("UserViewModel", "Datos obtenidos de UserRepo: $fetchedUser")
 
                 withContext(Dispatchers.Main) {
+                    // Si es un `UserBuyer`, actualizamos los datos del comprador
                     when (fetchedUser) {
                         is UserBuyer -> {
                             _userBuyer.value = fetchedUser
-                            _userSeller.value = null  // Asegura que `userSeller` esté en `null`
-                            Log.d("UserViewModel", "UserBuyer cargado: ${fetchedUser.name}")
+                            _userSeller.value = null
                             userState.value = 3  // Estado: Success
                         }
                         is UserSeller -> {
                             _userSeller.value = fetchedUser
-                            _userBuyer.value = null  // Asegura que `userBuyer` esté en `null`
-                            Log.d("UserViewModel", "UserSeller cargado: ${fetchedUser.name}")
+                            _userBuyer.value = null
                             userState.value = 3  // Estado: Success
                         }
                         else -> {
-                            Log.d("UserViewModel", "Error: Usuario no encontrado o de tipo desconocido.")
-                            userState.value = 2  // Estado: Error
+                            userState.value = 2  // Estado: Error si el usuario no es encontrado
                         }
                     }
                 }
             } catch (ex: Exception) {
                 Log.e("UserViewModel", "Error al cargar usuario: ${ex.localizedMessage}")
-                withContext(Dispatchers.Main) { userState.value = 2 }  // Estado: Error
-            } finally {
-                withContext(Dispatchers.Main) { userState.value = 0 } // Reset al estado inicial
+                withContext(Dispatchers.Main) { userState.value = 2 }
             }
         }
     }
 
-
-
-
-
-    // Actualizar información de UserBuyer
+    // Método para actualizar la información de un comprador
     fun updateUserBuyer(user: UserBuyer) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                withContext(Dispatchers.Main) { userState.value = 1 }
+                withContext(Dispatchers.Main) { userState.value = 1 }  // Estado: Loading
                 userRepo.updateUser(user)
-                withContext(Dispatchers.Main) { userState.value = 3 }
+                withContext(Dispatchers.Main) { userState.value = 3 }  // Estado: Success
             } catch (ex: Exception) {
-                withContext(Dispatchers.Main) { userState.value = 2 }
+                withContext(Dispatchers.Main) { userState.value = 2 }  // Estado: Error
                 ex.printStackTrace()
             }
         }
     }
 
-    // Actualizar información de UserSeller
+    // Método para actualizar la información de un vendedor
     fun updateUserSeller(user: UserSeller) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -100,4 +87,5 @@ class UserViewModel(
         }
     }
 }
+
 

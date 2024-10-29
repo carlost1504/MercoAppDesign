@@ -46,13 +46,12 @@ fun UserProfileScreen(
     navController: NavController?,
     userViewModel: UserViewModel = viewModel()
 ) {
-    // Observa el estado de usuario (comprador o vendedor)
+    // Observa los estados de usuario y la carga
     val userBuyer by userViewModel.userBuyer.observeAsState()
     val userSeller by userViewModel.userSeller.observeAsState()
-    val userState by userViewModel.userState.observeAsState()
+    val userState by userViewModel.userState.observeAsState(0)
 
-
-    // Inicia la carga de datos del usuario (asegúrate de llamar a getUser con el ID correcto)
+    // Inicia la carga de datos del usuario
     LaunchedEffect(Unit) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid
         if (userId != null) {
@@ -62,22 +61,17 @@ fun UserProfileScreen(
         }
     }
 
-
-
-
     LazyColumn(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize().padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
-        // Encabezado
         item { Header(navController = navController, "Perfil de Usuario", "userProfile") }
         item { Spacer(modifier = Modifier.height(30.dp)) }
 
-        // Indicador de carga según el estado de usuario
+        // Control de estado de carga
         when (userState) {
-            1 -> {
-                // Estado de carga
+            1 -> {  // Estado de carga
                 item {
                     CircularProgressIndicator(
                         modifier = Modifier
@@ -92,8 +86,7 @@ fun UserProfileScreen(
                     )
                 }
             }
-            2 -> {
-                // Estado de error
+            2 -> {  // Estado de error
                 item {
                     Text(
                         text = "Error al cargar datos del usuario.",
@@ -103,11 +96,10 @@ fun UserProfileScreen(
                     )
                 }
             }
-            3 -> {
-                // Estado de éxito
+            3 -> {  // Estado de éxito
                 userBuyer?.let { user ->
                     item {
-                        Text(text = "Usuario: ${user.name}")
+                        Text(text = "Comprador: ${user.name}")
                         CustomTextFieldDisplay(value = user.name ?: "Nombre no disponible", label = "Nombre")
                         CustomTextFieldDisplay(value = user.lastName ?: "Apellido no disponible", label = "Apellido")
                     }
@@ -120,8 +112,7 @@ fun UserProfileScreen(
                     }
                 }
             }
-            else -> {
-                // Sin datos disponibles
+            else -> {  // Sin datos disponibles
                 item {
                     Text(
                         text = "No se encontraron datos del usuario.",
@@ -134,9 +125,6 @@ fun UserProfileScreen(
         }
     }
 }
-
-
-
 
 
 
