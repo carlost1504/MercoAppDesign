@@ -1,42 +1,27 @@
 package com.example.mercoapp.ui.pages
 
-import android.net.Uri
 import android.util.Log
-import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
-import com.example.mercoapp.domain.model.UserBuyer
-import com.example.mercoapp.ui.components.ActionButton
 import com.example.mercoapp.ui.components.CustomTextFieldDisplay
 import com.example.mercoapp.ui.components.Header
-import com.example.mercoapp.ui.theme.redMerco
-import com.example.mercoapp.viewModel.AuthViewModel
 import com.example.mercoapp.viewModel.UserViewModel
 import com.google.firebase.auth.FirebaseAuth
 
@@ -66,8 +51,10 @@ fun UserProfileScreen(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
-        item { Header(navController = navController, "Perfil de Usuario", "userProfile") }
-        item { Spacer(modifier = Modifier.height(30.dp)) }
+        item {
+            Header(navController = navController, "Perfil de Usuario", "userProfile")
+            Spacer(modifier = Modifier.height(30.dp))
+        }
 
         // Control de estado de carga
         when (userState) {
@@ -96,19 +83,57 @@ fun UserProfileScreen(
                     )
                 }
             }
-            3 -> {  // Estado de éxito
+            3 -> {  // Estado de éxito, mostrando la información del usuario
                 userBuyer?.let { user ->
                     item {
-                        Text(text = "Comprador: ${user.name}")
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Foto de perfil del comprador
+                        if (user.profilePhotoUri.isNotEmpty()) {
+                            Image(
+                                painter = rememberImagePainter(data = user.profilePhotoUri),
+                                contentDescription = "Foto de perfil del comprador",
+                                modifier = Modifier
+                                    .size(100.dp)
+                                    .clip(CircleShape)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+
                         CustomTextFieldDisplay(value = user.name ?: "Nombre no disponible", label = "Nombre")
                         CustomTextFieldDisplay(value = user.lastName ?: "Apellido no disponible", label = "Apellido")
+                        CustomTextFieldDisplay(value = user.typeDocument ?: "Tipo de Documento no disponible", label = "Tipo de Documento")
+                        CustomTextFieldDisplay(value = user.document ?: "Documento no disponible", label = "Documento")
+                        CustomTextFieldDisplay(value = user.email ?: "Correo electrónico no disponible", label = "Correo Electrónico")
+                        CustomTextFieldDisplay(value = user.cell ?: "Número de celular no disponible", label = "Celular")
                     }
                 }
+
                 userSeller?.let { user ->
                     item {
-                        Text(text = "Vendedor: ${user.name}")
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Foto de perfil del vendedor
+                        if (user.profilePhotoUri.isNotEmpty()) {
+                            Image(
+                                painter = rememberImagePainter(data = user.profilePhotoUri),
+                                contentDescription = "Foto de perfil del vendedor",
+                                modifier = Modifier
+                                    .size(100.dp)
+                                    .clip(CircleShape)
+
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+
                         CustomTextFieldDisplay(value = user.name ?: "Nombre de Vendedor no disponible", label = "Nombre de Vendedor")
-                        CustomTextFieldDisplay(value = user.id ?: "ID de Vendedor no disponible", label = "ID de Vendedor")
+                        CustomTextFieldDisplay(value = user.lastName ?: "Apellido no disponible", label = "Apellido")
+                        CustomTextFieldDisplay(value = user.documentTypes ?: "Tipo de Documento no disponible", label = "Tipo de Documento")
+                        CustomTextFieldDisplay(value = user.document ?: "Documento no disponible", label = "Documento")
+                        CustomTextFieldDisplay(value = user.email ?: "Correo electrónico no disponible", label = "Correo Electrónico")
+                        CustomTextFieldDisplay(value = user.cell ?: "Número de celular no disponible", label = "Celular")
+                        CustomTextFieldDisplay(value = user.storeAddress ?: "Dirección no disponible", label = "Dirección de la tienda")
                     }
                 }
             }
@@ -125,6 +150,7 @@ fun UserProfileScreen(
         }
     }
 }
+
 
 
 
