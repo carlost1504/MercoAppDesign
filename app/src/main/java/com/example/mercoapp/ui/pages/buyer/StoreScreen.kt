@@ -1,4 +1,4 @@
-package com.example.mercoapp.ui.pages
+package com.example.mercoapp.ui.pages.buyer
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -16,19 +16,32 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.outlined.Menu
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.mercoapp.R
 import com.example.mercoapp.ui.components.BottomNavigationBarr
+import com.example.mercoapp.viewModel.UserViewModel
+
+
+@Composable
+fun StoreScreen(modifier: Modifier= Modifier,
+                navController: NavController?,
+                userViewModel: UserViewModel = viewModel()
+) {
+
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StoreScreen() {
+fun StoreScreen(
+
+    navController: NavController?,
+
+) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -41,7 +54,7 @@ fun StoreScreen() {
             )
         },
         bottomBar = {
-            BottomNavigationBarr(currentScreen = "Tienda")
+            BottomNavigationBarr(navController,"Tienda")
         }
     ) { padding ->
         Column(
@@ -158,7 +171,9 @@ fun ProductItem() {
 @Preview(showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
 fun StoreScreenPreview() {
-    MaterialTheme {
-        StoreScreen()
-    }
+    StoreScreen(navController = rememberNavController())
 }
+
+
+
+

@@ -17,7 +17,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
 
-class SignupViewModel(
+open class SignupViewModel(
     val authRepo: AuthRepository = AuthRepositoryImpl(),  // Repositorio de autenticación
     val userRepo: UserRepository = UserRepositoryImpl()   // Repositorio para guardar usuarios en Firestore
 ) : ViewModel() {

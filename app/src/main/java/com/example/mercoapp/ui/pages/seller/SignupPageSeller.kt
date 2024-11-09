@@ -1,7 +1,6 @@
-package com.example.mercoapp.ui.pages
+package com.example.mercoapp.ui.pages.seller
 
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -22,12 +21,14 @@ import androidx.compose.material.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import coil.compose.rememberImagePainter
 import com.example.mercoapp.ui.theme.redMerco
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.mercoapp.domain.model.UserBuyer
+import androidx.navigation.compose.rememberNavController
 import com.example.mercoapp.domain.model.UserSeller
 import com.example.mercoapp.ui.components.ActionButton
 import com.example.mercoapp.ui.components.CustomTextField
@@ -36,7 +37,6 @@ import com.example.mercoapp.ui.components.DropdownButton
 import com.example.mercoapp.ui.components.PasswordTextField
 import com.example.mercoapp.ui.components.ProfilePhotoButton
 import com.example.mercoapp.viewModel.SignupViewModel
-import com.google.firebase.firestore.FirebaseFirestore
 
 
 @Composable
@@ -237,11 +237,30 @@ fun SignupPageSeller(
 }
 
 
-/*
-@Preview(showBackground = true)
+@Preview(showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
-fun SigniupPagePreview() {
-    // Aquí no necesitas pasar navController ni authViewModel para la vista previa
-    SignupPageBuyer(navController = null, authViewModel = null)
+fun SignupPageSellerPreview() {
+    // Creamos un NavController de prueba
+    val navController = rememberNavController()
+
+    // Creamos un AuthViewModel simulado
+    val authViewModel = remember {
+        object : AuthViewModel() {
+            // Puedes añadir valores por defecto en el ViewModel aquí si es necesario para la vista previa
+        }
+    }
+
+    // Creamos un SignupViewModel simulado
+    val signupViewModel = remember {
+        object : SignupViewModel() {
+            // Puedes añadir valores por defecto en el ViewModel aquí si es necesario para la vista previa
+        }
+    }
+
+    // Llamamos a la función SignupPageSeller con los ViewModels y NavController de prueba
+    SignupPageSeller(
+        navController = navController,
+        authViewModel = authViewModel,
+        viewModel = signupViewModel
+    )
 }
- */

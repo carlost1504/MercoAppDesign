@@ -6,13 +6,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
-import com.example.mercoapp.ui.pages.HomePage
+import com.example.mercoapp.ui.pages.buyer.HomePage
 import com.example.mercoapp.ui.pages.LoginPage
 import com.example.mercoapp.ui.pages.MercoInit
-import com.example.mercoapp.ui.pages.SignupPageSeller
-import com.example.mercoapp.ui.pages.SignupPageBuyer
+import com.example.mercoapp.ui.pages.seller.SignupPageSeller
+import com.example.mercoapp.ui.pages.buyer.SignupPageBuyer
+import com.example.mercoapp.ui.pages.buyer.StoreScreen
 import com.example.mercoapp.ui.pages.TypeUserSignup
-import com.example.mercoapp.ui.pages.UserLoadScreen
 import com.example.mercoapp.ui.pages.UserProfileScreen
 import com.example.mercoapp.viewModel.AuthViewModel
 
@@ -62,13 +62,7 @@ fun MyAppNavigation(modifier: Modifier = Modifier, authViewModel: AuthViewModel)
             )
         }
 
-        composable("userLoad") {
-            UserLoadScreen(
-                navController = navController,
-                authViewModel = authViewModel,
-                userViewModel = viewModel()  // Pasa userViewModel para manejo de datos
-            )
-        }
+
 
         composable("infoUser") {
             UserProfileScreen(
@@ -81,7 +75,16 @@ fun MyAppNavigation(modifier: Modifier = Modifier, authViewModel: AuthViewModel)
         composable("home") {
             HomePage(
                 modifier = modifier,
-                navController = navController
+                navController = navController,
+                userViewModel = viewModel()
+            )
+        }
+
+        composable("store") {
+            StoreScreen(
+                modifier = modifier,
+                navController = navController,
+                userViewModel = viewModel()
             )
         }
     }

@@ -14,14 +14,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class UserViewModel(
+open class UserViewModel(
     private val userRepo: UserRepository = UserRepositoryImpl()
 ) : ViewModel() {
 
-    private val _userBuyer = MutableLiveData<UserBuyer?>()
+    val _userBuyer = MutableLiveData<UserBuyer?>()
     val userBuyer: LiveData<UserBuyer?> = _userBuyer
 
-    private val _userSeller = MutableLiveData<UserSeller?>()
+    val _userSeller = MutableLiveData<UserSeller?>()
     val userSeller: LiveData<UserSeller?> = _userSeller
 
     val userState = MutableLiveData(0)  // Estado del usuario (0: idle, 1: loading, 2: error, 3: success)

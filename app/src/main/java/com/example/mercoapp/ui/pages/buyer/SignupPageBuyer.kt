@@ -1,7 +1,6 @@
-package com.example.mercoapp.ui.pages
+package com.example.mercoapp.ui.pages.buyer
 
 import android.net.Uri
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -17,28 +16,29 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import com.example.mercoapp.viewModel.AuthViewModel
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import com.example.mercoapp.domain.model.UserBuyer
-import com.example.mercoapp.service.UserServices
-import com.example.mercoapp.service.UserServicesImpl
 import com.example.mercoapp.ui.components.ActionButton
 import com.example.mercoapp.ui.components.CustomTextField
 import com.example.mercoapp.ui.components.Header
 import com.example.mercoapp.ui.components.PasswordTextField
 import com.example.mercoapp.ui.components.ProfilePhotoButton
 import com.example.mercoapp.ui.components.DropdownButton
+import com.example.mercoapp.ui.pages.seller.SignupPageSeller
 import com.example.mercoapp.ui.theme.redMerco
 import com.example.mercoapp.viewModel.SignupViewModel
-import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun SignupPageBuyer(
@@ -149,10 +149,30 @@ fun SignupPageBuyer(
     }
 }
 
-/*
-@Preview(showBackground = true)
+@Preview(showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
-fun SigniupSellerPagePreview() {
-    SignupPageSeller(navController = null, authViewModel = null)
+fun SignupPageBuyerPreview() {
+    // Creamos un NavController de prueba
+    val navController = rememberNavController()
+
+    // Creamos un AuthViewModel simulado
+    val authViewModel = remember {
+        object : AuthViewModel() {
+            // Puedes añadir valores por defecto en el ViewModel aquí si es necesario para la vista previa
+        }
+    }
+
+    // Creamos un SignupViewModel simulado
+    val signupViewModel = remember {
+        object : SignupViewModel() {
+            // Puedes añadir valores por defecto en el ViewModel aquí si es necesario para la vista previa
+        }
+    }
+
+    // Llamamos a la función SignupPageSeller con los ViewModels y NavController de prueba
+    SignupPageBuyer(
+        navController = navController,
+        authViewModel = authViewModel,
+        viewModel = signupViewModel
+    )
 }
- */
