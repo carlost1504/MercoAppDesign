@@ -16,6 +16,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -106,11 +108,11 @@ fun CartItem(itemName: String, itemPrice: String, imageUrl: String) {
                 Text(text = itemName, style = MaterialTheme.typography.bodyLarge)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = { /* Disminuir cantidad */ }) {
-                        Icon(Icons.Default.Close, contentDescription = "Disminuir")
+                        Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Disminuir")
                     }
                     Text("1", style = MaterialTheme.typography.bodyLarge)
                     IconButton(onClick = { /* Aumentar cantidad */ }) {
-                        Icon(Icons.Default.Add, contentDescription = "Aumentar")
+                        Icon(Icons.Default.KeyboardArrowUp, contentDescription = "Aumentar")
                     }
                 }
             }
