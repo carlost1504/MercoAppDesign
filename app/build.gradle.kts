@@ -54,9 +54,6 @@ dependencies {
 
 
 
-    implementation ("com.google.android.gms:play-services-base:VERSION")
-
-
     // Versión de Material Design para Compose
     implementation("androidx.compose.material:material:1.4.3")
 
@@ -87,6 +84,8 @@ dependencies {
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.engage.core)
     implementation(libs.firebase.storage.ktx)
+    implementation(libs.firebase.storage)
+    implementation(libs.firebase.firestore)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

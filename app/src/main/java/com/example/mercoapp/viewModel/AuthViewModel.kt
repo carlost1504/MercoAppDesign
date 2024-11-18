@@ -4,11 +4,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mercoapp.domain.model.AuthState
 import com.example.mercoapp.domain.model.UserBuyer
 import com.example.mercoapp.domain.model.UserSeller
 import com.example.mercoapp.repository.AuthRepository
 import com.example.mercoapp.repository.AuthRepositoryImpl
 import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -18,11 +21,8 @@ open class AuthViewModel(
 ) : ViewModel() {
 
     // Estados de autenticación
-    open val authState = MutableLiveData(0)
-    // 0. Idle - No hay operación en curso
-    // 1. Loading - Operación en proceso
-    // 2. Error - Ocurrió un error
-    // 3. Success - Operación exitosa
+    private val _authState = MutableLiveData<AuthState>(AuthState.Idle)
+    val authState: LiveData<AuthState> = _authState
 
     // ID del usuario autenticado
     private val _userId = MutableLiveData<String?>()
@@ -31,12 +31,29 @@ open class AuthViewModel(
     // Función para registrar un comprador
     fun signupBuyer(buyer: UserBuyer, password: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            withContext(Dispatchers.Main) { authState.value = 1 } // Estado: Loading
             try {
-                repo.signupBuyer(buyer, password) // Registrar el comprador
-                withContext(Dispatchers.Main) { authState.value = 3 } // Estado: Success
+                withContext(Dispatchers.Main) { _authState.value = AuthState.Loading }
+
+                // Registrar el comprador
+                repo.signupBuyer(buyer, password)
+
+                withContext(Dispatchers.Main) {
+                    _authState.value = AuthState.Success
+                }
+            } catch (ex: FirebaseAuthInvalidCredentialsException) {
+                withContext(Dispatchers.Main) {
+                    _authState.value = AuthState.Error("Correo o contraseña inválidos.")
+                }
+                ex.printStackTrace()
             } catch (ex: FirebaseAuthException) {
-                withContext(Dispatchers.Main) { authState.value = 2 } // Estado: Error
+                withContext(Dispatchers.Main) {
+                    _authState.value = AuthState.Error("Error al registrar el comprador.")
+                }
+                ex.printStackTrace()
+            } catch (ex: Exception) {
+                withContext(Dispatchers.Main) {
+                    _authState.value = AuthState.Error("Error inesperado: ${ex.localizedMessage}")
+                }
                 ex.printStackTrace()
             }
         }
@@ -45,12 +62,29 @@ open class AuthViewModel(
     // Función para registrar un vendedor
     fun signupSeller(seller: UserSeller, password: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            withContext(Dispatchers.Main) { authState.value = 1 } // Estado: Loading
             try {
-                repo.signupSeller(seller, password) // Registrar el vendedor
-                withContext(Dispatchers.Main) { authState.value = 3 } // Estado: Success
+                withContext(Dispatchers.Main) { _authState.value = AuthState.Loading }
+
+                // Registrar el vendedor
+                repo.signupSeller(seller, password)
+
+                withContext(Dispatchers.Main) {
+                    _authState.value = AuthState.Success
+                }
+            } catch (ex: FirebaseAuthInvalidCredentialsException) {
+                withContext(Dispatchers.Main) {
+                    _authState.value = AuthState.Error("Correo o contraseña inválidos.")
+                }
+                ex.printStackTrace()
             } catch (ex: FirebaseAuthException) {
-                withContext(Dispatchers.Main) { authState.value = 2 } // Estado: Error
+                withContext(Dispatchers.Main) {
+                    _authState.value = AuthState.Error("Error al registrar el vendedor.")
+                }
+                ex.printStackTrace()
+            } catch (ex: Exception) {
+                withContext(Dispatchers.Main) {
+                    _authState.value = AuthState.Error("Error inesperado: ${ex.localizedMessage}")
+                }
                 ex.printStackTrace()
             }
         }
@@ -59,24 +93,44 @@ open class AuthViewModel(
     // Función para iniciar sesión
     fun signin(email: String, password: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            withContext(Dispatchers.Main) {
-                if (authState.value != 1) { // Solo cambia a 'Loading' si no está en ese estado
-                    authState.value = 1
-                }
-            }
             try {
-                val user = repo.signin(email, password) // Intento de log in
-                if (user != null) {  // Asegurarse de que user es válido antes de asignar el UID
-                    _userId.postValue(user.uid)
-                    withContext(Dispatchers.Main) { authState.value = 3 } // Estado: Success
-                } else {
-                    withContext(Dispatchers.Main) { authState.value = 2 } // Estado: Error
+                withContext(Dispatchers.Main) {
+                    _authState.value = AuthState.Loading
                 }
-            } catch (ex: FirebaseAuthException) {
-                withContext(Dispatchers.Main) { authState.value = 2 } // Estado: Error
+
+                // Inicia sesión con el repositorio
+                val user = repo.signin(email, password)
+
+                if (user != null) {
+                    // Usuario autenticado correctamente
+                    _userId.postValue(user.uid)
+                    withContext(Dispatchers.Main) {
+                        _authState.value = AuthState.Success
+                    }
+                } else {
+                    // Usuario no encontrado
+                    withContext(Dispatchers.Main) {
+                        _authState.value = AuthState.Error("No se pudo iniciar sesión. Intente nuevamente.")
+                    }
+                }
+            } catch (ex: FirebaseAuthInvalidUserException) {
+                withContext(Dispatchers.Main) {
+                    _authState.value = AuthState.Error("El usuario no existe.")
+                }
+                ex.printStackTrace()
+            } catch (ex: FirebaseAuthInvalidCredentialsException) {
+                withContext(Dispatchers.Main) {
+                    _authState.value = AuthState.Error("Correo o contraseña incorrectos.")
+                }
+                ex.printStackTrace()
+            } catch (ex: Exception) {
+                withContext(Dispatchers.Main) {
+                    _authState.value = AuthState.Error("Error inesperado: ${ex.localizedMessage}")
+                }
                 ex.printStackTrace()
             }
         }
     }
 }
+
 
