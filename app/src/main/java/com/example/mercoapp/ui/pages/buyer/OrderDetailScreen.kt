@@ -39,6 +39,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import com.example.mercoapp.R
+import com.example.mercoapp.domain.model.OrderItem
 import com.example.mercoapp.ui.components.BottomNavigationBarr
 import com.example.mercoapp.viewModel.UserViewModel
 
@@ -167,14 +168,7 @@ fun OrderInfoSection(deliveryAddresses: List<String>, totalAmount: String) {
     }
 }
 
-// Modelo de datos para los artículos de ejemplo
-data class OrderItem(
-    val name: String,
-    val variety: String,
-    val quantity: Int,
-    val price: String,
-    val imageUrl: String
-)
+
 
 // Ejemplo de datos de los artículos del pedido
 fun getSampleOrderItems(): List<OrderItem> {

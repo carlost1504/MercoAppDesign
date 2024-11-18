@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
+import com.example.mercoapp.ui.components.CartItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,42 +86,7 @@ fun CartScreen(navController: NavController?) {
     }
 }
 
-@Composable
-fun CartItem(itemName: String, itemPrice: String, imageUrl: String) {
-    Card(
-        shape = RoundedCornerShape(8.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Image(
-                painter = rememberImagePainter(data = imageUrl),
-                contentDescription = "Imagen del producto",
-                modifier = Modifier.size(64.dp)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = itemName, style = MaterialTheme.typography.bodyLarge)
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = { /* Disminuir cantidad */ }) {
-                        Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Disminuir")
-                    }
-                    Text("1", style = MaterialTheme.typography.bodyLarge)
-                    IconButton(onClick = { /* Aumentar cantidad */ }) {
-                        Icon(Icons.Default.KeyboardArrowUp, contentDescription = "Aumentar")
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(text = itemPrice, style = MaterialTheme.typography.bodyLarge)
-        }
-    }
-}
+
 
 
 @Preview(showBackground = true, widthDp = 360, heightDp = 800)

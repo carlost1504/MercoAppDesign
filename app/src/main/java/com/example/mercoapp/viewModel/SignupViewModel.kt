@@ -74,17 +74,5 @@ open class SignupViewModel(
         }
     }
 
-    // Iniciar sesión
-    fun signin(email: String, password: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                withContext(Dispatchers.Main) { authState.value = 1 }  // Estado: Loading
-                authRepo.signin(email, password)
-                withContext(Dispatchers.Main) { authState.value = 3 }  // Estado: Success
-            } catch (ex: FirebaseAuthException) {
-                withContext(Dispatchers.Main) { authState.value = 2 }  // Estado: Error
-                ex.printStackTrace()
-            }
-        }
-    }
+
 }

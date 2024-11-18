@@ -16,6 +16,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +38,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.mercoapp.viewModel.AuthViewModel
 import com.example.mercoapp.R
+import com.example.mercoapp.domain.model.UserBuyer
+import com.example.mercoapp.domain.model.UserSeller
 import com.example.mercoapp.ui.components.ActionButton
 import com.example.mercoapp.ui.components.CustomTextField
 import com.example.mercoapp.ui.components.PasswordTextField
@@ -50,13 +53,30 @@ fun LoginPage(
     modifier: Modifier = Modifier,
     navController: NavController?,
     authViewModel: AuthViewModel = viewModel(),
-    userViewModel: UserViewModel = viewModel()  // Conecta el UserViewModel para usar después del login
+    userViewModel: UserViewModel = viewModel()
 ) {
     val authState by authViewModel.authState.observeAsState(0)
     val userId by authViewModel.userId.observeAsState()
-
+    val user = userViewModel.user.observeAsState().value
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
+
+    // Cargar datos del usuario después del inicio de sesión exitoso
+    LaunchedEffect(authState) {
+        if (authState == 3 && userId != null) {
+            userViewModel.loadCurrentUser() // Carga los datos del usuario autenticado
+        }
+    }
+
+    // Navegar cuando el usuario esté cargado
+    LaunchedEffect(user) {
+        user?.let { fetchedUser ->
+            when (fetchedUser) {
+                is UserSeller -> navController?.navigate("sellerProducts/${fetchedUser.id}")
+                is UserBuyer -> navController?.navigate("buyerHome/${fetchedUser.id}")
+            }
+        }
+    }
 
     Column(
         modifier = modifier
@@ -66,11 +86,7 @@ fun LoginPage(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Encabezado
-        Header(
-            navController = navController,
-            "Inicio de sesion",
-            "mercoInit"
-        )
+        Header(navController = navController, "Inicio de sesión", "mercoInit")
 
         Spacer(modifier = Modifier.height(30.dp))
 
@@ -78,9 +94,7 @@ fun LoginPage(
             painter = painterResource(id = R.drawable.logo_merco_app),
             contentDescription = "Logo",
             contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .size(250.dp)
-                .clip(CircleShape)
+            modifier = Modifier.size(250.dp).clip(CircleShape)
         )
 
         Column(
@@ -91,20 +105,9 @@ fun LoginPage(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Campo de correo electrónico
-            CustomTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = "Correo electrónico"
-            )
-
+            CustomTextField(value = email, onValueChange = { email = it }, label = "Correo electrónico")
             Spacer(modifier = Modifier.height(16.dp))
-
-            // Campo de contraseña
-            PasswordTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = "Contraseña"
-            )
+            PasswordTextField(value = password, onValueChange = { password = it }, label = "Contraseña")
         }
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -113,35 +116,28 @@ fun LoginPage(
         when (authState) {
             0 -> Spacer(modifier = Modifier.height(16.dp)) // Estado inicial
             1 -> CircularProgressIndicator() // Estado: Cargando
-            2 -> Text(text = "Hubo un error al iniciar sesión, por favor intenta de nuevo", color = Color.Red) // Estado: Error
-            3 -> {
-                // Navega a la pantalla del perfil de usuario con el ID del usuario autenticado
-                userId?.let { id ->
-                    userViewModel.getUser(id) // Llama a getUser en UserViewModel para cargar la información
-                    navController?.navigate("infoUser") // Navegar a la pantalla de perfil
-                }
-            }
+            2 -> Text(
+                text = "Hubo un error al iniciar sesión, por favor intenta de nuevo",
+                color = Color.Red
+            ) // Estado: Error
         }
 
         ActionButton(
             text = "Entrar",
-            onClick = {
-                authViewModel.signin(email, password) // Inicia sesión
-            },
+            onClick = { authViewModel.signin(email, password) },
             backgroundColor = redMerco
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Botón para crear cuenta
-        TextButton(onClick = {
-            navController?.navigate("typeUser")
-        }) {
+        TextButton(onClick = { navController?.navigate("typeUser") }) {
             Text(text = "Si no tienes cuenta, crear cuenta")
         }
+
         Spacer(modifier = Modifier.height(30.dp))
     }
 }
+
 
 
 

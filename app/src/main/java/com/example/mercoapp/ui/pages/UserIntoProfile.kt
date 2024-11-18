@@ -36,14 +36,13 @@ import com.example.mercoapp.viewModel.UserViewModel
 
 
 @Composable
-fun UserProfileScreen(
+fun UserBuyerProfileScreen(
     modifier: Modifier = Modifier,
     navController: NavController?,
     userViewModel: UserViewModel = viewModel()
 ) {
-    // Observa los estados de usuario y la carga
-    val userBuyer by userViewModel.userBuyer.observeAsState()
-    val userSeller by userViewModel.userSeller.observeAsState()
+    // Observa los datos del usuario y el estado
+    val user by userViewModel.user.observeAsState()
     val userState by userViewModel.userState.observeAsState(0)
 
     // Inicia la carga de datos del usuario solo si es la primera vez que se compone
@@ -52,13 +51,11 @@ fun UserProfileScreen(
     }
 
     Scaffold(
-
-        topBar={
-            Header(navController = navController,  "Perfil de Usuario",  "userProfile")
+        topBar = {
+            Header(navController = navController, "Perfil de Comprador", "userProfile")
         },
         bottomBar = {
-            BottomNavigationBarr(navController, "Perfil") // Cambia "Perfil" según el nombre de la pantalla actual
-
+            BottomNavigationBarr(navController, "Perfil")
         }
     ) { padding ->
         LazyColumn(
@@ -69,9 +66,6 @@ fun UserProfileScreen(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.Start
         ) {
-
-
-            // Control de estado de carga
             when (userState) {
                 1 -> { // Estado de carga
                     item {
@@ -100,24 +94,31 @@ fun UserProfileScreen(
                         )
                     }
                 }
-                3 -> { // Estado de éxito, mostrando la información del usuario
-                    userBuyer?.let { user ->
-                        item {
-                            UserDetails(user = user,modifier)
+                3 -> { // Estado de éxito
+                    if (user is UserBuyer) {
+                        (user as? UserBuyer)?.let { buyer ->
+                            item {
+                                BuyerDetails(buyer = buyer, modifier)
+                            }
                         }
-                    }
-
-                    userSeller?.let { user ->
+                    } else {
                         item {
-                            UserDetails(user = user, modifier)
+                            Text(
+                                text = "No se encontraron datos del comprador.",
+                                color = Color.Red,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                            )
                         }
                     }
                 }
-                else -> { // Sin datos disponibles
+                else -> { // Estado inicial o desconocido
                     item {
                         Text(
                             text = "No se encontraron datos del usuario.",
-                            color = Color.Red,
+                            color = Color.Gray,
                             textAlign = TextAlign.Center,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -131,104 +132,62 @@ fun UserProfileScreen(
 }
 
 @Composable
-fun UserDetails(user: Any,modifier: Modifier = Modifier) {
-    when (user) {
-        is UserBuyer -> {
-            // Renderiza la información específica de UserBuyer
-            CustomTextFieldDisplay(
-                value = user.name ?: "Nombre no disponible",
-                label = "Nombre",
-
-            )
-            CustomTextFieldDisplay(
-                value = user.lastName ?: "Apellido no disponible",
-                label = "Apellido",
-            )
-            CustomTextFieldDisplay(
-                value = user.typeDocument ?: "Tipo de Documento no disponible",
-                label = "Tipo de Documento",
-            )
-            CustomTextFieldDisplay(
-                value = user.document ?: "Documento no disponible",
-                label = "Documento",
-            )
-            CustomTextFieldDisplay(
-                value = user.email ?: "Correo electrónico no disponible",
-                label = "Correo Electrónico",
-            )
-            CustomTextFieldDisplay(
-                value = user.cell ?: "Número de celular no disponible",
-                label = "Celular",
-            )
-        }
-        is UserSeller -> {
-            // Renderiza la información específica de UserSeller
-            CustomTextFieldDisplay(
-                value = user.name ?: "Nombre de Vendedor no disponible",
-                label = "Nombre de Vendedor",
-            )
-            CustomTextFieldDisplay(
-                value = user.lastName ?: "Apellido no disponible",
-                label = "Apellido",
-            )
-            CustomTextFieldDisplay(
-                value = user.documentTypes ?: "Tipo de Documento no disponible",
-                label = "Tipo de Documento",
-            )
-            CustomTextFieldDisplay(
-                value = user.document ?: "Documento no disponible",
-                label = "Documento",
-            )
-            CustomTextFieldDisplay(
-                value = user.email ?: "Correo electrónico no disponible",
-                label = "Correo Electrónico",
-            )
-            CustomTextFieldDisplay(
-                value = user.cell ?: "Número de celular no disponible",
-                label = "Celular",
-            )
-            CustomTextFieldDisplay(
-                value = user.storeAddress ?: "Dirección no disponible",
-                label = "Dirección de la tienda",
-            )
-        }
+fun BuyerDetails(buyer: UserBuyer, modifier: Modifier = Modifier) {
+    // Renderiza la información específica de UserBuyer
+    Column(modifier = modifier.fillMaxWidth()) {
+        CustomTextFieldDisplay(
+            value = buyer.name ?: "Nombre no disponible",
+            label = "Nombre",
+        )
+        CustomTextFieldDisplay(
+            value = buyer.lastName ?: "Apellido no disponible",
+            label = "Apellido",
+        )
+        CustomTextFieldDisplay(
+            value = buyer.typeDocument ?: "Tipo de Documento no disponible",
+            label = "Tipo de Documento",
+        )
+        CustomTextFieldDisplay(
+            value = buyer.document ?: "Documento no disponible",
+            label = "Documento",
+        )
+        CustomTextFieldDisplay(
+            value = buyer.email ?: "Correo electrónico no disponible",
+            label = "Correo Electrónico",
+        )
+        CustomTextFieldDisplay(
+            value = buyer.cell ?: "Número de celular no disponible",
+            label = "Celular",
+        )
     }
 }
 
 @Preview(showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
-fun UserProfileScreenPreview() {
-    // Creamos un NavController de prueba
+fun UserBuyerProfileScreenPreview() {
     val navController = rememberNavController()
 
-    // Creamos un ViewModel de prueba
     val userViewModel = remember {
         object : UserViewModel() {
-            // Sobreescribimos los datos para el Preview
             init {
-                _userBuyer.value = UserBuyer(
-                    name = "Laura",
-                    lastName = "Pérez",
-                    typeDocument = "CC",
-                    document = "123456789",
-                    email = "laura@example.com",
-                    cell = "3201234567",
-                    profilePhotoUri = "" // Uri simulada o puedes usar una imagen de recurso
+                _userBuyer.postValue(
+                    UserBuyer(
+                        name = "Laura",
+                        lastName = "Pérez",
+                        typeDocument = "CC",
+                        document = "123456789",
+                        email = "laura@example.com",
+                        cell = "3201234567",
+                        profilePhotoUri = ""
+                    )
                 )
-                _userSeller.value = null // Dejamos a null ya que estamos simulando solo un tipo de usuario
-                userState.value = 3 // Estado de éxito para mostrar datos
+                _userState.postValue(3)
             }
         }
     }
 
-    // Llamamos a la función UserProfileScreen con el NavController y ViewModel de prueba
-    UserProfileScreen(
+    UserBuyerProfileScreen(
         navController = navController,
         userViewModel = userViewModel
     )
 }
-
-
-
-
-

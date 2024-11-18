@@ -40,6 +40,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
+import com.example.mercoapp.ui.components.AddressCard
+import com.example.mercoapp.ui.components.OrderSummary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,56 +96,9 @@ fun OrderConfirmationScreen(navController: NavController?) {
     }
 }
 
-@Composable
-fun AddressCard(title: String, address: String, changeable: Boolean = false) {
-    Card(
-        shape = RoundedCornerShape(8.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(modifier = Modifier.fillMaxWidth()
-            .padding(16.dp)) {
-            Text(text = title, fontWeight = FontWeight.Bold)
-            Text(text = address, style = MaterialTheme.typography.bodyMedium)
-            if (changeable) {
-                Text(
-                    text = "Cambiar",
-                    color = Color.Red,
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .clickable { /* Acción para cambiar dirección */ }
-                )
-            }
-        }
-    }
-}
 
-@Composable
-fun OrderSummary(orderTotal: String, summaryTotal: String) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text("Orden:", style = MaterialTheme.typography.bodyMedium)
-            Text(orderTotal, style = MaterialTheme.typography.bodyMedium)
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text("Resumen:", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
-            Text(summaryTotal, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
-        }
-    }
-}
+
+
 
 
 @Preview(showBackground = true, widthDp = 360, heightDp = 800)

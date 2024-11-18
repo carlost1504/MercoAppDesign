@@ -13,11 +13,19 @@ interface UserRepository {
     suspend fun getCurrentUser(): Any?             // Obtener el usuario actual (podría ser Buyer o Seller)
     suspend fun getUserById(userId: String): Any?  // Obtener usuario específico por ID
     suspend fun updateUser(user: Any)              // Actualizar usuario (comprador o vendedor)
+    suspend fun addProductToSeller(sellerId: String, productId: String)
+    suspend fun getProductsBySeller(sellerId: String): List<String>
 }
 
 class UserRepositoryImpl(
     private val userServices: UserServices = UserServicesImpl()
 ) : UserRepository {
+
+    override suspend fun getProductsBySeller(sellerId: String): List<String> {
+        // Obtén el vendedor por su ID
+        val seller = userServices.getSellerById(sellerId)
+        return seller?.productIds ?: emptyList() // Devuelve la lista de productos o una lista vacía
+    }
 
     // Crear un comprador y almacenarlo en Firestore
     override suspend fun createBuyer(buyer: UserBuyer) {
@@ -65,6 +73,14 @@ class UserRepositoryImpl(
             is UserSeller -> userServices.updateSeller(user) // Actualizar vendedor
             else -> throw IllegalArgumentException("Tipo de usuario no soportado")
         }
+    }
+
+    override suspend fun addProductToSeller(sellerId: String, productId: String) {
+        val seller = userServices.getSellerById(sellerId) // Obtén el vendedor actual
+        seller?.let {
+            it.productIds.add(productId) // Agrega el ID del producto a la lista
+            userServices.updateSeller(it) // Actualiza el vendedor en Firestore
+        } ?: throw Exception("Seller not found")
     }
 
 }

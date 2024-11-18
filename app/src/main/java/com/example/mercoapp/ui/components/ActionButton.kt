@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.RoundedCornerShape
 
 @Composable
-fun ActionButton(text: String, onClick: () -> Unit, backgroundColor: Color) {
+fun ActionButton(text: String, onClick:  () -> Unit, backgroundColor: Color) {
     Button(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),

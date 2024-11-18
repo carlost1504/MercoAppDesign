@@ -139,7 +139,7 @@ fun SignupPageSeller(
             } // Estado: Error
             3 -> item {
                 // Estado: Éxito, navegar a la pantalla de inicio
-                navController?.navigate("infoUser")
+                navController?.navigate("sellerProducts/{sellerId}")
             }
         }
 

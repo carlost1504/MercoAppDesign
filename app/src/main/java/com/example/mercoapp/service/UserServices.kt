@@ -74,4 +74,6 @@ class UserServicesImpl : UserServices {
             .set(seller)
             .await()  // Si estás usando coroutines para manejar la espera de Firestore
     }
+
+
 }
