@@ -1,7 +1,6 @@
-package com.example.mercoapp.ui.pages
+package com.example.mercoapp.ui.pages.seller
 
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -22,12 +21,14 @@ import androidx.compose.material.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import coil.compose.rememberImagePainter
 import com.example.mercoapp.ui.theme.redMerco
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.mercoapp.domain.model.UserBuyer
+import androidx.navigation.compose.rememberNavController
 import com.example.mercoapp.domain.model.UserSeller
 import com.example.mercoapp.ui.components.ActionButton
 import com.example.mercoapp.ui.components.CustomTextField
@@ -35,7 +36,6 @@ import com.example.mercoapp.ui.components.Header
 import com.example.mercoapp.ui.components.DropdownButton
 import com.example.mercoapp.ui.components.PasswordTextField
 import com.example.mercoapp.ui.components.ProfilePhotoButton
-import com.google.firebase.firestore.FirebaseFirestore
 
 
 @Composable
@@ -43,6 +43,7 @@ fun SignupPageSeller(
     modifier: Modifier = Modifier,
     navController: NavController?,
     authViewModel: AuthViewModel = viewModel(),
+
 ) {
     val authState by authViewModel.authState.observeAsState(0) // Observamos el estado de autenticación
 
@@ -137,7 +138,7 @@ fun SignupPageSeller(
             } // Estado: Error
             3 -> item {
                 // Estado: Éxito, navegar a la pantalla de inicio
-                navController?.navigate("infoUser")
+                navController?.navigate("sellerProducts/{sellerId}")
             }
         }
 
@@ -234,11 +235,3 @@ fun SignupPageSeller(
 }
 
 
-/*
-@Preview(showBackground = true)
-@Composable
-fun SigniupPagePreview() {
-    // Aquí no necesitas pasar navController ni authViewModel para la vista previa
-    SignupPageBuyer(navController = null, authViewModel = null)
-}
- */

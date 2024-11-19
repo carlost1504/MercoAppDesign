@@ -17,7 +17,7 @@ fun CustomTextFieldDisplay(value: String, label: String) {
         onValueChange = {},  // No permite cambios
         label = { Text(text = label) },
         enabled = false,  // Desactiva la edición
-        modifier = Modifier.fillMaxWidth(0.8f),
+        modifier = Modifier.fillMaxWidth(),
         colors = TextFieldDefaults.outlinedTextFieldColors(
             focusedBorderColor = MaterialTheme.colors.primary,
             unfocusedBorderColor = MaterialTheme.colors.onSurface,

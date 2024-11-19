@@ -2,6 +2,7 @@ package com.example.mercoapp.viewModel
 
 import android.util.Log
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,11 +10,12 @@ import com.example.mercoapp.domain.model.UserBuyer
 import com.example.mercoapp.domain.model.UserSeller
 import com.example.mercoapp.repository.UserRepository
 import com.example.mercoapp.repository.UserRepositoryImpl
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class UserViewModel(
+open class UserViewModel(
     private val userRepo: UserRepository = UserRepositoryImpl()
 ) : ViewModel() {
 
@@ -23,69 +25,59 @@ class UserViewModel(
     private val _userSeller = MutableLiveData<UserSeller?>()
     val userSeller: LiveData<UserSeller?> = _userSeller
 
-    val userState = MutableLiveData(0)  // Estado del usuario (0: idle, 1: loading, 2: error, 3: success)
+    private val _user = MediatorLiveData<Any?>().apply {
+        addSource(_userBuyer) { value = it }
+        addSource(_userSeller) { value = it }
+    }
+    val user: LiveData<Any?> = _user
+
+    private val _userState = MutableLiveData<Int>(0) // 0: Idle
+    val userState: LiveData<Int> = _userState
+
+    fun loadCurrentUser() {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId.isNullOrEmpty()) {
+            Log.e("UserViewModel", "Error: userId is null or empty. User may not be authenticated.")
+            updateUserState(2) // Error
+            return
+        }
+        getUser(userId)
+    }
 
     fun getUser(userId: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.Main) {
+            updateUserState(1) // Loading
             try {
-                // Cambia el estado a "loading"
-                withContext(Dispatchers.Main) { userState.value = 1 }
-
-                // Intentamos obtener el usuario de Firebase
-                val fetchedUser = userRepo.getUserById(userId)
-
-                withContext(Dispatchers.Main) {
-                    // Si es un `UserBuyer`, actualizamos los datos del comprador
-                    when (fetchedUser) {
-                        is UserBuyer -> {
-                            _userBuyer.value = fetchedUser
-                            _userSeller.value = null
-                            userState.value = 3  // Estado: Success
-                        }
-                        is UserSeller -> {
-                            _userSeller.value = fetchedUser
-                            _userBuyer.value = null
-                            userState.value = 3  // Estado: Success
-                        }
-                        else -> {
-                            userState.value = 2  // Estado: Error si el usuario no es encontrado
-                        }
+                val fetchedUser = withContext(Dispatchers.IO) { userRepo.getUserById(userId) }
+                when (fetchedUser) {
+                    is UserBuyer -> handleFetchedBuyer(fetchedUser)
+                    is UserSeller -> handleFetchedSeller(fetchedUser)
+                    else -> {
+                        Log.e("UserViewModel", "Error: Usuario no encontrado")
+                        updateUserState(2) // Error
                     }
                 }
             } catch (ex: Exception) {
                 Log.e("UserViewModel", "Error al cargar usuario: ${ex.localizedMessage}")
-                withContext(Dispatchers.Main) { userState.value = 2 }
+                updateUserState(2) // Error
             }
         }
     }
 
-    // Método para actualizar la información de un comprador
-    fun updateUserBuyer(user: UserBuyer) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                withContext(Dispatchers.Main) { userState.value = 1 }  // Estado: Loading
-                userRepo.updateUser(user)
-                withContext(Dispatchers.Main) { userState.value = 3 }  // Estado: Success
-            } catch (ex: Exception) {
-                withContext(Dispatchers.Main) { userState.value = 2 }  // Estado: Error
-                ex.printStackTrace()
-            }
-        }
+    private fun handleFetchedBuyer(buyer: UserBuyer) {
+        _userBuyer.value = buyer
+        _userSeller.value = null
+        updateUserState(3) // Success
     }
 
-    // Método para actualizar la información de un vendedor
-    fun updateUserSeller(user: UserSeller) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                withContext(Dispatchers.Main) { userState.value = 1 }
-                userRepo.updateUser(user)
-                withContext(Dispatchers.Main) { userState.value = 3 }
-            } catch (ex: Exception) {
-                withContext(Dispatchers.Main) { userState.value = 2 }
-                ex.printStackTrace()
-            }
-        }
+    private fun handleFetchedSeller(seller: UserSeller) {
+        _userSeller.value = seller
+        _userBuyer.value = null
+        updateUserState(3) // Success
+    }
+
+    private fun updateUserState(state: Int) {
+        _userState.value = state
     }
 }
-
 

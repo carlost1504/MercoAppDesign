@@ -16,6 +16,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +38,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.mercoapp.viewModel.AuthViewModel
 import com.example.mercoapp.R
+import com.example.mercoapp.domain.model.AuthState
 import com.example.mercoapp.ui.components.ActionButton
 import com.example.mercoapp.ui.components.CustomTextField
 import com.example.mercoapp.ui.components.PasswordTextField
@@ -50,13 +52,29 @@ fun LoginPage(
     modifier: Modifier = Modifier,
     navController: NavController?,
     authViewModel: AuthViewModel = viewModel(),
-    userViewModel: UserViewModel = viewModel()  // Conecta el UserViewModel para usar después del login
+    userViewModel: UserViewModel = viewModel() // Conecta el UserViewModel para usar después del login
 ) {
-    val authState by authViewModel.authState.observeAsState(0)
+    val authState by authViewModel.authState.observeAsState(AuthState.Idle) // Observa el estado de autenticación
     val userId by authViewModel.userId.observeAsState()
 
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
+
+    // Reaccionar a los estados de autenticación
+    LaunchedEffect(authState) {
+        when (authState) {
+            is AuthState.Success -> {
+                userId?.let { id ->
+                    userViewModel.getUser(id) // Carga los datos del usuario autenticado
+                    navController?.navigate("infoUser") // Navega a la pantalla del perfil de usuario
+                }
+            }
+            is AuthState.Error -> {
+                // Manejo de error: Puedes agregar lógica adicional aquí si es necesario
+            }
+            else -> {}
+        }
+    }
 
     Column(
         modifier = modifier
@@ -68,7 +86,7 @@ fun LoginPage(
         // Encabezado
         Header(
             navController = navController,
-            "Inicio de sesion",
+            "Inicio de sesión",
             "mercoInit"
         )
 
@@ -111,22 +129,19 @@ fun LoginPage(
 
         // Mostrar estado de autenticación
         when (authState) {
-            0 -> Spacer(modifier = Modifier.height(16.dp)) // Estado inicial
-            1 -> CircularProgressIndicator() // Estado: Cargando
-            2 -> Text(text = "Hubo un error al iniciar sesión, por favor intenta de nuevo", color = Color.Red) // Estado: Error
-            3 -> {
-                // Navega a la pantalla del perfil de usuario con el ID del usuario autenticado
-                userId?.let { id ->
-                    userViewModel.getUser(id) // Llama a getUser en UserViewModel para cargar la información
-                    navController?.navigate("infoUser") // Navegar a la pantalla de perfil
-                }
-            }
+            is AuthState.Idle -> Spacer(modifier = Modifier.height(16.dp)) // Estado inicial
+            is AuthState.Loading -> CircularProgressIndicator() // Estado: Cargando
+            is AuthState.Error -> Text(
+                text = (authState as AuthState.Error).message, // Mostrar el mensaje de error
+                color = Color.Red
+            )
+            is AuthState.Success -> Spacer(modifier = Modifier.height(16.dp)) // Nada aquí, ya se maneja en LaunchedEffect
         }
 
         ActionButton(
             text = "Entrar",
             onClick = {
-                authViewModel.signin(email, password) // Inicia sesión
+                authViewModel.signin(email, password) // Llama a la función signin del ViewModel
             },
             backgroundColor = redMerco
         )
@@ -147,24 +162,6 @@ fun LoginPage(
 
 
 
-@Preview(showBackground = true)
-@Composable
-fun LoginPagePreview() {
-    // Crear un NavController simulado para la vista previa
-    val navController = rememberNavController()
-
-    // Crear una versión simulada de AuthViewModel con estados predefinidos
-    val fakeAuthViewModel = object : AuthViewModel() {
-        // Para la vista previa, devolveremos un estado predeterminado
-        override val authState = MutableLiveData(0)
-    }
-
-    // Llamamos a LoginPage pasando los valores simulados
-    LoginPage(
-        navController = navController,
-        authViewModel = fakeAuthViewModel
-    )
-}
 
 
 

@@ -37,7 +37,6 @@ import com.example.mercoapp.ui.components.PasswordTextField
 import com.example.mercoapp.ui.components.ProfilePhotoButton
 import com.example.mercoapp.ui.components.DropdownButton
 import com.example.mercoapp.ui.theme.redMerco
-import com.example.mercoapp.viewModel.SignupViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
@@ -45,7 +44,6 @@ fun SignupPageBuyer(
     modifier: Modifier = Modifier,
     navController: NavController?,
     authViewModel: AuthViewModel = viewModel(),
-    viewModel: SignupViewModel = viewModel()
 ) {
     val authState by authViewModel.authState.observeAsState(0) // Observamos el estado de autenticación
 
@@ -137,7 +135,6 @@ fun SignupPageBuyer(
 
                         // Llamar a la función para registrar comprador
                         authViewModel.signupBuyer(buyer, password)
-                        viewModel.signupBuyer(buyer, password)
 
 
                     }
