@@ -22,11 +22,11 @@ open class AuthViewModel(
 
     // Estados de autenticación
     private val _authState = MutableLiveData<AuthState>(AuthState.Idle)
-    val authState: LiveData<AuthState> = _authState
+    open val authState: LiveData<AuthState> = _authState
 
     // ID del usuario autenticado
     private val _userId = MutableLiveData<String?>()
-    val userId: LiveData<String?> = _userId
+    open val userId: LiveData<String?> = _userId
 
     // Función para registrar un comprador
     fun signupBuyer(buyer: UserBuyer, password: String) {
@@ -91,7 +91,7 @@ open class AuthViewModel(
     }
 
     // Función para iniciar sesión
-    fun signin(email: String, password: String) {
+    open fun signin(email: String, password: String) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 withContext(Dispatchers.Main) {

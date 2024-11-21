@@ -46,7 +46,7 @@ import com.example.mercoapp.viewModel.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserProfileScreen(navController: NavController?) {
+fun UserProfileScreenBuyer(navController: NavController?) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -141,5 +141,5 @@ fun UserProfileScreenPreview() {
     // Simulamos el NavController para la previsualización
     val navController = rememberNavController()
 
-    UserProfileScreen(navController = navController)
+    UserProfileScreenBuyer(navController = navController)
 }

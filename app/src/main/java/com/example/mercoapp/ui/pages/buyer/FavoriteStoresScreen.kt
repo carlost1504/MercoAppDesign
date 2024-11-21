@@ -26,7 +26,7 @@ import com.example.mercoapp.ui.components.BottomNavigationBarr
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FavoriteStoresScreen(
+fun FavoriteStoresScreenBuyer(
 
     navController: NavController?,
 
@@ -129,5 +129,5 @@ fun FavoriteStoreItem(
 @Preview(showBackground = true)
 @Composable
 fun FavoriteStoresScreenPreview() {
-    FavoriteStoresScreen(navController = rememberNavController())
+    FavoriteStoresScreenBuyer(navController = rememberNavController())
 }

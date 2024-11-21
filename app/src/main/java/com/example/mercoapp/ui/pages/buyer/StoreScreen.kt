@@ -26,22 +26,20 @@ import com.example.mercoapp.ui.components.BottomNavigationBarr
 import com.example.mercoapp.viewModel.UserViewModel
 
 
-@Composable
-fun StoreScreen(modifier: Modifier= Modifier,
-                navController: NavController?,
-                userViewModel: UserViewModel = viewModel()
-) {
 
-}
+
+
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StoreScreen(
+fun StoreScreenBuyer(
 
+    modifier: Modifier= Modifier,
     navController: NavController?,
-
-) {
+    userViewModel: UserViewModel = viewModel()
+    ) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -171,7 +169,7 @@ fun ProductItem() {
 @Preview(showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
 fun StoreScreenPreview() {
-    StoreScreen(navController = rememberNavController())
+    StoreScreenBuyer(navController = rememberNavController())
 }
 
 

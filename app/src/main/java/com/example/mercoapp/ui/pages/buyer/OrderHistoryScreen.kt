@@ -45,7 +45,7 @@ import com.example.mercoapp.viewModel.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OrderHistoryScreen(navController: NavController?) {
+fun OrderHistoryScreenBuyer(navController: NavController?) {
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabs = listOf("Recogido", "En Espera", "Cancelado")
 
@@ -148,5 +148,5 @@ fun OrderHistoryScreenPreview() {
     // Simulamos el NavController para la previsualización
     val navController = rememberNavController()
 
-    OrderHistoryScreen(navController = navController)
+    OrderHistoryScreenBuyer(navController = navController)
 }

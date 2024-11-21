@@ -43,7 +43,7 @@ import com.example.mercoapp.ui.components.ProfilePhotoButton
 import com.example.mercoapp.viewModel.UserViewModel
 
 @Composable
-fun UserSellerProfileScreen(
+fun UserProfileScreenSeller(
     modifier: Modifier = Modifier,
     navController: NavController?,
     userViewModel: UserViewModel = viewModel()
@@ -173,33 +173,6 @@ fun SellerDetails(seller: UserSeller, modifier: Modifier = Modifier) {
     }
 }
 
-@Preview(showBackground = true, widthDp = 360, heightDp = 800)
-@Composable
-fun SellerProfileScreenPreview() {
-    // Creamos un NavController de prueba
-    val navController = rememberNavController()
 
-    // Simulamos un objeto UserSeller para la vista previa
-    val mockSeller = UserSeller(
-        id = "seller12345",
-        name = "Carlos",
-        lastName = "Ramírez",
-        documentTypes = "CC",
-        document = "987654321",
-        email = "carlos@tienda.com",
-        cell = "3209876543",
-        profilePhotoUri = "https://via.placeholder.com/150",
-        password = "password123",
-        nameStore = "Tienda de Carlos",
-        storeAddress = "Calle 123 #45-67, Bogotá",
-        storePhotoUri = "https://via.placeholder.com/150",
-        storeDescription = "La mejor tienda de tecnología en la ciudad.",
-        addressShops = "Sucursal en Centro Comercial Andino",
-        productIds = mutableListOf("prod1", "prod2", "prod3")
-    )
-
-    // Llamamos a la función SellerDetails directamente para simular la vista
-    SellerDetails(seller = mockSeller)
-}
 
 

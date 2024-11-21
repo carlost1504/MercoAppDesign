@@ -18,7 +18,7 @@ import androidx.compose.material3.IconButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoriesScreen() {
+fun CategoriesScreenBuyer() {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -114,6 +114,6 @@ fun CategoryItem(name: String) {
 @Composable
 fun CategoriesScreenPreview() {
     MaterialTheme {
-        CategoriesScreen()
+        CategoriesScreenBuyer()
     }
 }

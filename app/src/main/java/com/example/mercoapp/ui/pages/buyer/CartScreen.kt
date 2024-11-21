@@ -42,7 +42,7 @@ import com.example.mercoapp.ui.components.CartItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CartScreen(navController: NavController?) {
+fun CartScreenBuyer(navController: NavController?) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -95,5 +95,5 @@ fun CartScreenPreview() {
     // Simulamos el NavController para la previsualización
     val navController = rememberNavController()
 
-    CartScreen(navController = navController)
+    CartScreenBuyer(navController = navController)
 }

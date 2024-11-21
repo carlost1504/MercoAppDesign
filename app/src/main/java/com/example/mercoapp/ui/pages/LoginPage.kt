@@ -1,5 +1,7 @@
 package com.example.mercoapp.ui.pages
 
+import android.os.Handler
+import android.os.Looper
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,6 +34,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -158,6 +161,40 @@ fun LoginPage(
     }
 }
 
+@Preview(showBackground = true, widthDp = 360, heightDp = 800)
+@Composable
+fun LoginPagePreview() {
+    // Simulamos un NavController
+    val navController = rememberNavController()
+
+    // Simulamos un AuthViewModel con estados de prueba
+    val fakeAuthViewModel = object : AuthViewModel() {
+        private val _authState = MutableLiveData<AuthState>(AuthState.Idle)
+        private val _userId = MutableLiveData<String?>(null)
+
+        override val authState: LiveData<AuthState> = _authState
+        override val userId: LiveData<String?> = _userId
+
+        override fun signin(email: String, password: String) {
+            _authState.value = AuthState.Loading
+            // Simula éxito después de un segundo
+            Handler(Looper.getMainLooper()).postDelayed({
+                _userId.value = "mock_user_id"
+                _authState.value = AuthState.Success
+            }, 1000)
+        }
+    }
+
+    // Simulamos un UserViewModel (sin lógica real para este ejemplo)
+    val fakeUserViewModel = object : UserViewModel() {}
+
+    // Renderizamos la LoginPage con los valores simulados
+    LoginPage(
+        navController = navController,
+        authViewModel = fakeAuthViewModel,
+        userViewModel = fakeUserViewModel
+    )
+}
 
 
 

@@ -38,7 +38,7 @@ import java.util.UUID
 
 
 @Composable
-fun CreateProductPage(
+fun CreateProductPageSeller(
     modifier: Modifier = Modifier,
     navController: NavController?,
     productViewModel: ProductViewModel = viewModel(),
@@ -194,7 +194,7 @@ fun CreateProductPagePreview() {
     // Simulamos un ID de vendedor
     val mockSellerId = "seller12345"
 
-    CreateProductPage(
+    CreateProductPageSeller(
         navController = navController,
         productViewModel = productViewModel,
         sellerId = mockSellerId

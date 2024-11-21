@@ -35,7 +35,7 @@ import com.example.mercoapp.R
 import com.example.mercoapp.viewModel.UserViewModel
 
 @Composable
-fun HomePage(modifier: Modifier= Modifier, navController: NavController,userViewModel: UserViewModel = viewModel()){
+fun HomePageBuyer(modifier: Modifier= Modifier, navController: NavController,userViewModel: UserViewModel = viewModel()){
 
     Column {
         Text(text = "Hola entre")

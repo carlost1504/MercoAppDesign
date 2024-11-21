@@ -44,7 +44,7 @@ import com.example.mercoapp.viewModel.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SellerProductsScreen(
+fun SellerProductsScreenSeller(
     navController: NavController?,
     productViewModel: ProductViewModel = viewModel(),
     sellerId: String
@@ -177,7 +177,7 @@ fun SellerProductsScreenPreview() {
     val mockSellerId = "seller12345"
 
     // Llama a la función principal de la pantalla
-    SellerProductsScreen(
+    SellerProductsScreenSeller(
         navController = navController,
         productViewModel = fakeProductViewModel,
         sellerId = mockSellerId

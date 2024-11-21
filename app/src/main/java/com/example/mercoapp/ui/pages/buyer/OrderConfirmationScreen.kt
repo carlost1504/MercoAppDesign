@@ -45,7 +45,7 @@ import com.example.mercoapp.ui.components.OrderSummary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OrderConfirmationScreen(navController: NavController?) {
+fun OrderConfirmationScreenBuyer(navController: NavController?) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -107,5 +107,5 @@ fun OrderConfirmationScreenPreview() {
     // Simulamos el NavController para la previsualización
     val navController = rememberNavController()
 
-    OrderConfirmationScreen(navController = navController)
+    OrderConfirmationScreenBuyer(navController = navController)
 }

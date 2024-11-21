@@ -20,6 +20,7 @@ import com.example.mercoapp.viewModel.AuthViewModel
 import androidx.compose.material.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import coil.compose.rememberImagePainter
@@ -29,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
+import com.example.mercoapp.domain.model.AuthState
 import com.example.mercoapp.domain.model.UserSeller
 import com.example.mercoapp.ui.components.ActionButton
 import com.example.mercoapp.ui.components.CustomTextField
@@ -42,14 +44,13 @@ import com.example.mercoapp.ui.components.ProfilePhotoButton
 fun SignupPageSeller(
     modifier: Modifier = Modifier,
     navController: NavController?,
-    authViewModel: AuthViewModel = viewModel(),
-
+    authViewModel: AuthViewModel = viewModel()
 ) {
-    val authState by authViewModel.authState.observeAsState(0) // Observamos el estado de autenticación
+    val authState by authViewModel.authState.observeAsState(AuthState.Idle)
 
     var name by rememberSaveable { mutableStateOf("") }
     var lastName by rememberSaveable { mutableStateOf("") }
-    val selectedDocumentType by rememberSaveable { mutableStateOf("") }  // Variable para almacenar el tipo de documento seleccionado
+    var selectedDocumentType by rememberSaveable { mutableStateOf("") }
     val documentTypes = listOf("Cédula de ciudadanía", "Tarjeta de identidad", "Tarjeta de extranjería", "Pasaporte")
     var document by rememberSaveable { mutableStateOf("") }
     var cell by rememberSaveable { mutableStateOf("") }
@@ -71,11 +72,23 @@ fun SignupPageSeller(
         profilePhotoUri = uri
     }
 
-    // Lanzador para cargar foto de la tienda
     val storePhotoLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         storePhotoUri = uri
+    }
+
+    // Reaccionar a los estados de autenticación
+    LaunchedEffect(authState) {
+        when (authState) {
+            is AuthState.Success -> {
+                navController?.navigate("sellerProducts")
+            }
+            is AuthState.Error -> {
+                // Manejamos los errores si es necesario
+            }
+            else -> {}
+        }
     }
 
     LazyColumn(
@@ -95,7 +108,11 @@ fun SignupPageSeller(
 
         item { Spacer(modifier = Modifier.height(8.dp)) }
 
-        item { DropdownButton(items = documentTypes) }
+        item {
+            DropdownButton(
+                items = documentTypes
+            )
+        }
 
         item { Spacer(modifier = Modifier.height(16.dp)) }
 
@@ -111,13 +128,7 @@ fun SignupPageSeller(
 
         item { Spacer(modifier = Modifier.height(16.dp)) }
 
-        item {
-            PasswordTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = "Contraseña"
-            )
-        }
+        item { PasswordTextField(value = password, onValueChange = { password = it }, label = "Contraseña") }
 
         item { Spacer(modifier = Modifier.height(16.dp)) }
 
@@ -132,20 +143,21 @@ fun SignupPageSeller(
 
         // Manejar el estado de autenticación
         when (authState) {
-            1 -> item { CircularProgressIndicator() } // Estado: Cargando
-            2 -> item {
-                Text(text = "Hubo un error al registrar la cuenta, por favor intenta de nuevo", color = Color.Red)
-            } // Estado: Error
-            3 -> item {
-                // Estado: Éxito, navegar a la pantalla de inicio
-                navController?.navigate("sellerProducts/{sellerId}")
+            is AuthState.Idle -> {}
+            is AuthState.Loading -> item { CircularProgressIndicator() }
+            is AuthState.Error -> item {
+                Text(
+                    text = (authState as AuthState.Error).message,
+                    color = Color.Red
+                )
             }
+            is AuthState.Success -> {}
         }
 
         item { Spacer(modifier = Modifier.height(24.dp)) }
 
         // Foto de perfil
-        item { ProfilePhotoButton(launcher = launcher,"Cargar imagen de perfil") }
+        item { ProfilePhotoButton(launcher = launcher, "Cargar imagen de perfil") }
 
         item {
             profilePhotoUri?.let { uri ->
@@ -160,19 +172,15 @@ fun SignupPageSeller(
 
         item { Spacer(modifier = Modifier.height(24.dp)) }
 
-        // Nuevos campos relacionados con la tienda
-
-        // Nombre de la tienda
+        // Información de la tienda
         item { CustomTextField(value = nameStore, onValueChange = { nameStore = it }, label = "Nombre de la tienda") }
 
         item { Spacer(modifier = Modifier.height(16.dp)) }
 
-        // Dirección de la tienda
         item { CustomTextField(value = storeAddress, onValueChange = { storeAddress = it }, label = "Dirección de la tienda") }
 
         item { Spacer(modifier = Modifier.height(16.dp)) }
 
-        // Botón para cargar foto de la tienda
         item { ProfilePhotoButton(launcher = storePhotoLauncher, "Cargar foto de la tienda") }
 
         item {
@@ -188,12 +196,10 @@ fun SignupPageSeller(
 
         item { Spacer(modifier = Modifier.height(16.dp)) }
 
-        // Descripción de la tienda
         item { CustomTextField(value = storeDescription, onValueChange = { storeDescription = it }, label = "Descripción de la tienda") }
 
         item { Spacer(modifier = Modifier.height(16.dp)) }
 
-        // Dirección de otros locales
         item { CustomTextField(value = addressShops, onValueChange = { addressShops = it }, label = "Dirección de otros locales") }
 
         item { Spacer(modifier = Modifier.height(24.dp)) }
@@ -204,12 +210,11 @@ fun SignupPageSeller(
                 text = "Crear cuenta",
                 onClick = {
                     if (passwordsMatch) {
-                        // Crear una instancia de UserBuyer con los datos del formulario
                         val seller = UserSeller(
                             id = "",
                             name = name,
                             lastName = lastName,
-                            documentTypes = selectedDocumentType,  // Aquí se usa el tipo de documento seleccionado
+                            documentTypes = selectedDocumentType,
                             document = document,
                             email = email,
                             cell = cell,
@@ -221,8 +226,6 @@ fun SignupPageSeller(
                             storeDescription = storeDescription,
                             addressShops = addressShops
                         )
-
-                        // Llamar a la función para registrar comprador
                         authViewModel.signupSeller(seller, password)
                     }
                 },
