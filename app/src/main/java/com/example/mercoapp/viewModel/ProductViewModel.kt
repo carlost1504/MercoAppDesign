@@ -52,9 +52,6 @@ open class ProductViewModel(
         }
     }
 
-    /**
-     * Crear producto y vincularlo al vendedor.
-     */
     fun addProductToSeller(
         sellerId: String,
         product: Product,
@@ -62,21 +59,17 @@ open class ProductViewModel(
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                // Guarda el producto en Firestore
-                productRepo.createProduct(product)
-
-                // Vincula el producto al vendedor
-                userRepo.addProductToSeller(sellerId, product.id)
+                // Directamente agrega el producto al vendedor
+                userRepo.addProductToSeller(sellerId, product)
 
                 // Si todo salió bien, notifica éxito
                 withContext(Dispatchers.Main) {
                     onComplete(Result.success(Unit))
                 }
             } catch (e: Exception) {
-                // Manejo de error
+                // Manejo de errores
                 withContext(Dispatchers.Main) {
                     onComplete(Result.failure(e))
-                    Log.e("ProductViewModel", "Error al agregar producto al vendedor: ${e.localizedMessage}")
                 }
             }
         }

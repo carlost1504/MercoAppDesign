@@ -1,6 +1,7 @@
 package com.example.mercoapp.repository
 
 import android.util.Log
+import com.example.mercoapp.domain.model.Product
 import com.example.mercoapp.domain.model.UserBuyer
 import com.example.mercoapp.domain.model.UserSeller
 import com.example.mercoapp.service.UserServices
@@ -14,8 +15,9 @@ interface UserRepository {
     suspend fun getCurrentUser(): Any? // Obtener el usuario actual (Buyer o Seller)
     suspend fun getUserById(userId: String): Any? // Obtener usuario específico por ID
     suspend fun updateUser(user: Any) // Actualizar usuario (Buyer o Seller)
-    suspend fun addProductToSeller(sellerId: String, productId: String) // Asociar producto al vendedor
+
     suspend fun getProductsBySeller(sellerId: String): List<String> // Obtener productos asociados al vendedor
+    suspend fun addProductToSeller(sellerId: String, product: Product)// Asociar producto al vendedor
 }
 
 class UserRepositoryImpl(
@@ -94,18 +96,14 @@ class UserRepositoryImpl(
     /**
      * Agregar un producto al vendedor y actualizar Firestore.
      */
-    override suspend fun addProductToSeller(sellerId: String, productId: String) {
-        val seller = userServices.getSellerById(sellerId) // Obtener el vendedor
+    override suspend fun addProductToSeller(sellerId: String, product: Product) {
+        val seller = userServices.getSellerById(sellerId) // Obtén el vendedor actual
         seller?.let {
-            if (!it.productIds.mapNotNull { id -> id.toString() }.contains(productId)) {
-                // Crear una nueva lista con el producto agregado (inmutabilidad de la data class)
-                val updatedSeller = it.copy(productIds = it.productIds + productId)
-                userServices.updateSeller(updatedSeller) // Actualizar vendedor en Firestore
-                Log.d("UserRepositoryImpl", "Producto $productId agregado al vendedor $sellerId")
-            } else {
-                Log.w("UserRepositoryImpl", "El producto $productId ya está asociado al vendedor $sellerId")
-            }
-        } ?: throw Exception("Vendedor con ID $sellerId no encontrado")
+            val updatedProductList = it.productIds.toMutableList()
+            updatedProductList.add(product) // Agrega el producto a la lista
+            it.productIds = updatedProductList // Actualiza la lista de productos
+            userServices.updateSeller(it) // Actualiza el vendedor completo en Firestore
+        } ?: throw Exception("Seller not found")
     }
 }
 

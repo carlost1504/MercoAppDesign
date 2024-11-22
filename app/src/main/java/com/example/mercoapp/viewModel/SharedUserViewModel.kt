@@ -62,18 +62,10 @@ class SharedUserViewModel(
     fun addProductToSeller(product: Product) {
         val currentSeller = _seller.value
         if (currentSeller != null) {
-            // Crear una copia actualizada del vendedor con el nuevo producto
-            val updatedSeller = currentSeller.copy(
-                productIds = currentSeller.productIds + product.id
-            )
-
-            // Actualizar el estado en el ViewModel
-            _seller.value = updatedSeller
-
-            // Opcional: Registrar el cambio en los logs para depuración
-            Log.d("SharedUserViewModel", "Producto agregado al vendedor: ${product.id}")
-        } else {
-            Log.e("SharedUserViewModel", "No se pudo agregar el producto: vendedor no disponible")
+            val updatedProducts = currentSeller.productIds.toMutableList()
+            updatedProducts.add(product) // Agrega el nuevo producto a la lista
+            currentSeller.productIds = updatedProducts // Actualiza la lista
+            _seller.postValue(currentSeller) // Notifica los cambios
         }
     }
 

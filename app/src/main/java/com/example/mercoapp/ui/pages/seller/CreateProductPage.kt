@@ -192,19 +192,32 @@ fun CreateProductPageSeller(
                                                     variety = variety,
                                                     isActive = true
                                                 )
-                                                productViewModel.addProductToSeller(currentSeller.id, product) { addResult ->
+                                                productViewModel.addProductToSeller(
+                                                    currentSeller.id,
+                                                    product
+                                                ) { addResult ->
                                                     addResult.onSuccess {
-                                                        sharedUserViewModel.addProductToSeller(product)
+                                                        // Actualiza los datos del vendedor
+                                                        sharedUserViewModel.addProductToSeller(
+                                                            product
+                                                        )
                                                         navController?.navigateUp()
                                                     }.onFailure { e ->
-                                                        productViewModel.onValidationError(e.message ?: "Error al agregar el producto.")
+                                                        productViewModel.onValidationError(
+                                                            e.message
+                                                                ?: "Error al agregar el producto."
+                                                        )
                                                     }
                                                 }
                                             }.onFailure {
-                                                productViewModel.onImageUploadError(it.message ?: "Error desconocido al subir la imagen.")
+                                                productViewModel.onImageUploadError(
+                                                    it.message
+                                                        ?: "Error desconocido al subir la imagen."
+                                                )
                                             }
                                         }
-                                    } ?: productViewModel.onValidationError("No se encontró el vendedor. Intente nuevamente.")
+                                    }
+                                        ?: productViewModel.onValidationError("No se encontró el vendedor. Intente nuevamente.")
                                 } else {
                                     productViewModel.onValidationError("Por favor complete todos los campos y seleccione una imagen.")
                                 }
