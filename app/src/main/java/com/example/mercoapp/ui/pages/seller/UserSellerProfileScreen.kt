@@ -59,7 +59,11 @@ fun UserProfileScreenSeller(
 ) {
     // Observar los datos del vendedor desde el SharedUserViewModel
     val seller by sharedUserViewModel.seller.observeAsState()
-    val sellerState = if (seller != null) 3 else 1 // Estado simulado: 1 = Cargando, 3 = Éxito
+    val sellerState = when {
+        seller != null -> 3 // Éxito
+        sharedUserViewModel.isLoading.value == true -> 1 // Cargando
+        else -> 2 // Error
+    }
 
     Scaffold(
         topBar = {
@@ -73,6 +77,7 @@ fun UserProfileScreenSeller(
                 actions = {
                     // Botón para salir
                     IconButton(onClick = {
+                        sharedUserViewModel.clearSellerData() // Limpia los datos del vendedor
                         navController?.navigate(MercoInit) {
                             popUpTo(0) // Elimina todo el stack de navegación
                         }
@@ -83,7 +88,11 @@ fun UserProfileScreenSeller(
             )
         },
         bottomBar = {
-            BottomNavigationBarrSeller(navController, "Perfil")
+            BottomNavigationBarrSeller(
+                navController = navController,
+                currentScreen = "Perfil",
+                sharedUserViewModel = sharedUserViewModel // Pasamos el ViewModel
+            )
         }
     ) { padding ->
         LazyColumn(
@@ -197,8 +206,6 @@ fun SellerDetails(seller: UserSeller, modifier: Modifier = Modifier) {
         )
     }
 }
-
-
 
 
 

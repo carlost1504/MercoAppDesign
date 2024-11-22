@@ -11,31 +11,46 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.navigation.NavController
+import com.example.mercoapp.Routes
 import com.example.mercoapp.Routes.CreateProductSeller
 import com.example.mercoapp.Routes.HomeSeller
 import com.example.mercoapp.Routes.UserProfileSeller
+import com.example.mercoapp.viewModel.SharedUserViewModel
 
 @Composable
-fun BottomNavigationBarrSeller(navController: NavController?, currentScreen: String) {
+fun BottomNavigationBarrSeller(navController: NavController?,
+                               currentScreen: String,
+                               sharedUserViewModel: SharedUserViewModel
+) {
+    val seller by sharedUserViewModel.seller.observeAsState()
+
     NavigationBar {
         NavigationBarItem(
             icon = { Icon(Icons.Filled.Home, contentDescription = "Inicio") },
             label = { Text("Inicio") },
             selected = currentScreen == "Inicio",
-            onClick = { navController?.navigate(HomeSeller) }
+            onClick = {
+                seller?.let { // Asegúrate de que seller no sea nulo
+                    navController?.navigate("${Routes.HomeSeller}/${it.id}") {
+                        popUpTo("${Routes.HomeSeller}/{sellerId}") { inclusive = true }
+                    }
+                }
+            }
         )
         NavigationBarItem(
             icon = { Icon(Icons.Filled.Favorite, contentDescription = "Favoritos") },
             label = { Text("Favoritos") },
             selected = currentScreen == "Favoritos",
-            onClick = { navController?.navigate(CreateProductSeller) }
+            onClick = { navController?.navigate(Routes.CreateProductSeller) }
         )
         NavigationBarItem(
             icon = { Icon(Icons.Filled.Person, contentDescription = "Perfil") },
             label = { Text("Perfil") },
             selected = currentScreen == "Perfil",
-            onClick = { navController?.navigate(UserProfileSeller) }
+            onClick = { navController?.navigate(Routes.UserProfileSeller) }
         )
     }
 }

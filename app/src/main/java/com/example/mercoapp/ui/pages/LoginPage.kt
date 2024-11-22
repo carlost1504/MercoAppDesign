@@ -2,6 +2,7 @@ package com.example.mercoapp.ui.pages
 
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -63,30 +64,45 @@ fun LoginPage(
     var password by rememberSaveable { mutableStateOf("") }
 
     // Redirigir según el tipo de usuario
-    LaunchedEffect(authState, userType) {
+    LaunchedEffect(authState) {
         when (authState) {
             is AuthState.Success -> {
-                userId?.let { id ->
-                    if (userType == null) {
-                        authViewModel.fetchUserType(id) // Determina si es buyer o seller
-                    } else {
-                        when (userType) {
-                            "buyer" -> navController?.navigate(Routes.HomeBuyer)
-                            "seller" -> {
-                                sharedUserViewModel.loadSellerData(id) // Carga los datos del vendedor
-                                navController?.navigate(Routes.HomeSeller) // Navega al subgrafo del vendedor
+                sharedUserViewModel.clearSellerData() // Limpia los datos del vendedor anterior
+
+                if (userId != null && userType != null) {
+                    when (userType) {
+                        "buyer" -> {
+                            navController?.navigate(Routes.HomeBuyer) {
+                                popUpTo(Routes.Login) { inclusive = true }
                             }
-                            else -> navController?.navigate(Routes.TypeUser)
+                        }
+                        "seller" -> {
+                            sharedUserViewModel.loadSellerData(userId!!) // Carga datos del vendedor
+                            navController?.navigate("${Routes.HomeSeller}/$userId") {
+                                popUpTo(Routes.Login) { inclusive = true }
+                            }
+                        }
+                        else -> {
+                            navController?.navigate(Routes.TypeUser) {
+                                popUpTo(Routes.Login) { inclusive = true }
+                            }
                         }
                     }
+                } else if (userId != null && userType == null) {
+                    authViewModel.fetchUserType(userId!!)
                 }
             }
             is AuthState.Error -> {
-                // Maneja el error aquí
+                Log.e("Login", "Error de autenticación: ${(authState as AuthState.Error).message}")
             }
-            else -> {}
+            else -> {
+                // Otros estados
+            }
         }
     }
+
+
+
 
     Column(
         modifier = modifier

@@ -87,7 +87,7 @@ fun SellerProductsScreenSeller(
             }
         },
         bottomBar = {
-            BottomNavigationBarrSeller(navController, "Inicio")
+            BottomNavigationBarrSeller(navController, "Inicio",sharedUserViewModel = sharedUserViewModel)
         }
     ) { padding ->
         Column(

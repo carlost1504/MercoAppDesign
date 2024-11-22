@@ -71,7 +71,6 @@ fun MainNavGraph(
     }
 }
 
-
 fun NavGraphBuilder.buyerNavGraph(navController: NavController) {
     navigation(startDestination = Routes.HomeBuyer, route = "buyer") {
         composable(Routes.HomeBuyer) {
@@ -111,14 +110,21 @@ fun NavGraphBuilder.sellerNavGraph(
     navController: NavController,
     sharedUserViewModel: SharedUserViewModel
 ) {
-    navigation(startDestination = Routes.HomeSeller, route = "seller") {
-        composable(Routes.HomeSeller) {
+    navigation(startDestination = "${Routes.HomeSeller}/{sellerId}", route = "seller") {
+        // Ruta dinámica para HomeSeller con sellerId
+        composable(
+            route = "${Routes.HomeSeller}/{sellerId}",
+            arguments = listOf(navArgument("sellerId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val sellerId = backStackEntry.arguments?.getString("sellerId")!!
+            sharedUserViewModel.loadSellerData(sellerId) // Carga los datos del vendedor
             SellerProductsScreenSeller(
                 navController = navController,
                 sharedUserViewModel = sharedUserViewModel
             )
         }
 
+        // Ruta para crear productos
         composable(Routes.CreateProductSeller) {
             CreateProductPageSeller(
                 navController = navController,
@@ -126,10 +132,12 @@ fun NavGraphBuilder.sellerNavGraph(
             )
         }
 
+        // Ruta para el registro de vendedor
         composable(Routes.SigupSeller) {
             SignupPageSeller(navController = navController)
         }
 
+        // Ruta para el perfil del vendedor
         composable(Routes.UserProfileSeller) {
             UserProfileScreenSeller(
                 navController = navController,
@@ -138,6 +146,7 @@ fun NavGraphBuilder.sellerNavGraph(
         }
     }
 }
+
 
 
 
