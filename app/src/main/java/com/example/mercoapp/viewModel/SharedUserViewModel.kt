@@ -69,4 +69,14 @@ class SharedUserViewModel(
         }
     }
 
+    fun removeProductFromSeller(product: Product) {
+        val currentSeller = _seller.value
+        if (currentSeller != null) {
+            val updatedProducts = currentSeller.productIds.toMutableList()
+            updatedProducts.remove(product) // Elimina el producto de la lista
+            currentSeller.productIds = updatedProducts // Actualiza la lista
+            _seller.postValue(currentSeller) // Notifica los cambios
+        }
+    }
+
 }

@@ -49,23 +49,13 @@ import com.example.mercoapp.viewModel.UserViewModel
 @Composable
 fun SellerProductsScreenSeller(
     navController: NavController?,
-    productViewModel: ProductViewModel = viewModel(),
     sharedUserViewModel: SharedUserViewModel
 ) {
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabs = listOf("Activos", "No activos", "Todos")
 
-    // Observar productos del vendedor y estado de carga
+    // Observar los datos del vendedor desde el SharedUserViewModel
     val seller by sharedUserViewModel.seller.observeAsState()
-    val sellerProducts by productViewModel.sellerProducts.observeAsState(emptyList())
-    val isLoading by productViewModel.isLoading.observeAsState(false)
-
-    // Cargar productos al inicio cuando `seller` esté disponible
-    LaunchedEffect(seller) {
-        seller?.let {
-            productViewModel.getProductsBySeller(it.id) // Usa el ID del vendedor del SharedUserViewModel
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -87,7 +77,7 @@ fun SellerProductsScreenSeller(
             }
         },
         bottomBar = {
-            BottomNavigationBarrSeller(navController, "Inicio",sharedUserViewModel = sharedUserViewModel)
+            BottomNavigationBarrSeller(navController, "Inicio", sharedUserViewModel = sharedUserViewModel)
         }
     ) { padding ->
         Column(
@@ -109,16 +99,9 @@ fun SellerProductsScreenSeller(
                 }
             }
 
-            if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    color = Color.Gray
-                )
-            } else {
-                // Mostrar productos filtrados
-                val filteredProducts = sellerProducts.filter {
+            // Verificar si el vendedor tiene productos
+            seller?.let { currentSeller ->
+                val filteredProducts = currentSeller.productIds.filter {
                     when (selectedTabIndex) {
                         0 -> it.isActive // Activos
                         1 -> !it.isActive // No activos
@@ -126,22 +109,48 @@ fun SellerProductsScreenSeller(
                     }
                 }
 
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(filteredProducts) { product ->
-                        ProductCard(
-                            product = product,
-                            onDeleteClick = { /* Agrega lógica para eliminar el producto */ }
-                        )
+                if (filteredProducts.isEmpty()) {
+                    // Mostrar mensaje si no hay productos
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("No hay productos disponibles.")
                     }
+                } else {
+                    // Mostrar productos en un LazyVerticalGrid
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(filteredProducts) { product ->
+                            ProductCard(
+                                product = product,
+                                onDeleteClick = {
+                                    sharedUserViewModel.removeProductFromSeller(product)
+                                }
+                            )
+                        }
+                    }
+                }
+            } ?: run {
+                // Mostrar indicador de carga mientras se obtienen los datos
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
                 }
             }
         }
     }
 }
+
 
 
