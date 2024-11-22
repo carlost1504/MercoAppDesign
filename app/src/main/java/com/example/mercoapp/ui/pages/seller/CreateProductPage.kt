@@ -8,6 +8,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -16,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -33,16 +36,18 @@ import com.example.mercoapp.ui.components.DropdownButton
 import com.example.mercoapp.ui.components.Header
 import com.example.mercoapp.ui.components.ProfilePhotoButton
 import com.example.mercoapp.viewModel.ProductViewModel
+import com.example.mercoapp.viewModel.SharedUserViewModel
 import java.util.UUID
 
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateProductPageSeller(
     modifier: Modifier = Modifier,
     navController: NavController?,
     productViewModel: ProductViewModel = viewModel(),
-    sellerId: String // ID del vendedor
+    sharedUserViewModel: SharedUserViewModel
 ) {
     // Variables de estado para los campos
     var name by rememberSaveable { mutableStateOf("") }
@@ -51,6 +56,9 @@ fun CreateProductPageSeller(
     var productPhotoUri by rememberSaveable { mutableStateOf<Uri?>(null) }
     var variety by rememberSaveable { mutableStateOf("") }
     val varieties = listOf("Vainilla", "Chocolate", "Fresa")
+
+    // Observar el vendedor desde el SharedUserViewModel
+    val seller by sharedUserViewModel.seller.observeAsState()
 
     // Lanzador para seleccionar imagen
     val photoLauncher = rememberLauncherForActivityResult(
@@ -61,7 +69,14 @@ fun CreateProductPageSeller(
 
     Scaffold(
         topBar = {
-            Header(navController = navController,  "Crear Producto",  "productList")
+            CenterAlignedTopAppBar(
+                title = { Text("Crear Producto", style = MaterialTheme.typography.titleMedium) },
+                navigationIcon = {
+                    IconButton(onClick = { navController?.navigateUp() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                    }
+                }
+            )
         },
         content = { padding ->
             LazyColumn(
@@ -115,7 +130,7 @@ fun CreateProductPageSeller(
 
                 // Botón para cargar imagen
                 item {
-                    ProfilePhotoButton(launcher = photoLauncher,  "Cargar imagen del producto")
+                    ProfilePhotoButton(launcher = photoLauncher, "Cargar imagen del producto")
                 }
 
                 // Mostrar imagen seleccionada
@@ -146,23 +161,25 @@ fun CreateProductPageSeller(
                                     return@ActionButton
                                 }
 
-                                productViewModel.uploadProductImage(productPhotoUri!!) { result ->
-                                    result.onSuccess { imageUrl ->
-                                        val product = Product(
-                                            id = UUID.randomUUID().toString(),
-                                            name = name,
-                                            description = description,
-                                            imageUrl = imageUrl,
-                                            price = priceValue,
-                                            variety = variety,
-                                            isActive = true
-                                        )
-                                        productViewModel.addProductToSeller(sellerId, product)
-                                        navController?.navigate("productList")
-                                    }.onFailure {
-                                        productViewModel.onImageUploadError(it.message ?: "Error desconocido al subir la imagen.")
+                                seller?.let { currentSeller ->
+                                    productViewModel.uploadProductImage(productPhotoUri!!) { result ->
+                                        result.onSuccess { imageUrl ->
+                                            val product = Product(
+                                                id = UUID.randomUUID().toString(),
+                                                name = name,
+                                                description = description,
+                                                imageUrl = imageUrl,
+                                                price = priceValue,
+                                                variety = variety,
+                                                isActive = true
+                                            )
+                                            productViewModel.addProductToSeller(currentSeller.id, product)
+                                            navController?.navigateUp()
+                                        }.onFailure {
+                                            productViewModel.onImageUploadError(it.message ?: "Error desconocido al subir la imagen.")
+                                        }
                                     }
-                                }
+                                } ?: productViewModel.onValidationError("No se encontró el vendedor. Intente nuevamente.")
                             } else {
                                 productViewModel.onValidationError("Por favor complete todos los campos y seleccione una imagen.")
                             }
@@ -171,34 +188,13 @@ fun CreateProductPageSeller(
                     )
                 }
 
-
                 item { Spacer(modifier = Modifier.height(30.dp)) }
             }
         }
     )
 }
 
-@Preview(showBackground = true, widthDp = 360, heightDp = 800)
-@Composable
-fun CreateProductPagePreview() {
-    // Creamos un NavController de prueba
-    val navController = rememberNavController()
 
-    // Simulamos un ProductViewModel
-    val productViewModel = remember {
-        object : ProductViewModel() {
-            // Métodos simulados para pruebas
-        }
-    }
 
-    // Simulamos un ID de vendedor
-    val mockSellerId = "seller12345"
-
-    CreateProductPageSeller(
-        navController = navController,
-        productViewModel = productViewModel,
-        sellerId = mockSellerId
-    )
-}
 
 

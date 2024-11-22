@@ -20,6 +20,11 @@ import com.example.mercoapp.viewModel.AuthViewModel
 import androidx.compose.material.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
@@ -31,33 +36,54 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
+import com.example.mercoapp.Routes.MercoInit
 import com.example.mercoapp.domain.model.UserSeller
 import com.example.mercoapp.ui.components.ActionButton
 import com.example.mercoapp.ui.components.BottomNavigationBarr
+import com.example.mercoapp.ui.components.BottomNavigationBarrSeller
 import com.example.mercoapp.ui.components.CustomTextField
 import com.example.mercoapp.ui.components.CustomTextFieldDisplay
 import com.example.mercoapp.ui.components.Header
 import com.example.mercoapp.ui.components.DropdownButton
 import com.example.mercoapp.ui.components.PasswordTextField
 import com.example.mercoapp.ui.components.ProfilePhotoButton
+import com.example.mercoapp.viewModel.SharedUserViewModel
 import com.example.mercoapp.viewModel.UserViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserProfileScreenSeller(
     modifier: Modifier = Modifier,
     navController: NavController?,
-    userViewModel: UserViewModel = viewModel()
+    sharedUserViewModel: SharedUserViewModel
 ) {
-    // Observa los datos del usuario vendedor y el estado
-    val user by userViewModel.user.observeAsState()
-    val userState by userViewModel.userState.observeAsState(0)
+    // Observar los datos del vendedor desde el SharedUserViewModel
+    val seller by sharedUserViewModel.seller.observeAsState()
+    val sellerState = if (seller != null) 3 else 1 // Estado simulado: 1 = Cargando, 3 = Éxito
 
     Scaffold(
         topBar = {
-            Header(navController = navController, "Perfil del Vendedor", "sellerProfile")
+            CenterAlignedTopAppBar(
+                title = { Text("Perfil del Vendedor", style = MaterialTheme.typography.h6) },
+                navigationIcon = {
+                    IconButton(onClick = { navController?.navigateUp() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                    }
+                },
+                actions = {
+                    // Botón para salir
+                    IconButton(onClick = {
+                        navController?.navigate(MercoInit) {
+                            popUpTo(0) // Elimina todo el stack de navegación
+                        }
+                    }) {
+                        Icon(Icons.Default.ExitToApp, contentDescription = "Salir")
+                    }
+                }
+            )
         },
         bottomBar = {
-            BottomNavigationBarr(navController, "Perfil")
+            BottomNavigationBarrSeller(navController, "Perfil")
         }
     ) { padding ->
         LazyColumn(
@@ -68,8 +94,8 @@ fun UserProfileScreenSeller(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.Start
         ) {
-            when {
-                userState == 1 -> { // Estado de carga
+            when (sellerState) {
+                1 -> { // Estado de carga
                     item {
                         CircularProgressIndicator(
                             modifier = Modifier
@@ -84,7 +110,7 @@ fun UserProfileScreenSeller(
                         )
                     }
                 }
-                userState == 2 -> { // Estado de error
+                2 -> { // Estado de error
                     item {
                         Text(
                             text = "Error al cargar datos del usuario.",
@@ -96,10 +122,10 @@ fun UserProfileScreenSeller(
                         )
                     }
                 }
-                user is UserSeller -> { // Estado de éxito con datos del vendedor
-                    (user as? UserSeller)?.let { seller ->
+                3 -> { // Estado de éxito con datos del vendedor
+                    seller?.let { currentSeller ->
                         item {
-                            SellerDetails(seller = seller, modifier)
+                            SellerDetails(seller = currentSeller, modifier)
                         }
                     }
                 }
@@ -169,9 +195,10 @@ fun SellerDetails(seller: UserSeller, modifier: Modifier = Modifier) {
             value = seller.storeDescription.ifEmpty { "Descripción de la tienda no disponible" },
             label = "Descripción de la Tienda",
         )
-
     }
 }
+
+
 
 
 

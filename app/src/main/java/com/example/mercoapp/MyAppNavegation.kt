@@ -29,30 +29,48 @@ import com.example.mercoapp.ui.pages.seller.SellerProductsScreenSeller
 import com.example.mercoapp.ui.pages.seller.SignupPageSeller
 import com.example.mercoapp.ui.pages.seller.UserProfileScreenSeller
 import com.example.mercoapp.viewModel.AuthViewModel
+import com.example.mercoapp.viewModel.SharedUserViewModel
 
 
 @Composable
-fun MainNavGraph(modifier: Modifier = Modifier, authViewModel: AuthViewModel) {
-
+fun MainNavGraph(
+    modifier: Modifier = Modifier,
+    authViewModel: AuthViewModel
+) {
     val navController = rememberNavController()
+    val sharedUserViewModel: SharedUserViewModel = viewModel() // Instancia del SharedUserViewModel
 
-    NavHost(navController = navController, startDestination = Routes.MercoInit) {
+    NavHost(
+        navController = navController,
+        startDestination = Routes.MercoInit
+    ) {
         composable(Routes.MercoInit) {
-            MercoInit(navController = navController, authViewModel = authViewModel)
+            MercoInit(
+                navController = navController,
+                authViewModel = authViewModel
+            )
         }
         composable(Routes.Login) {
-            LoginPage(navController = navController, authViewModel = authViewModel)
+            LoginPage(
+                navController = navController,
+                authViewModel = authViewModel,
+                sharedUserViewModel = sharedUserViewModel
+            )
         }
         composable(Routes.TypeUser) {
-            TypeUserSignup(navController = navController)
+            TypeUserSignup(
+                navController = navController
+            )
         }
 
         // Subgrafo de Buyer
         buyerNavGraph(navController)
+
         // Subgrafo de Seller
-        sellerNavGraph(navController)
+        sellerNavGraph(navController, sharedUserViewModel) // Pasamos el ViewModel compartido
     }
 }
+
 
 fun NavGraphBuilder.buyerNavGraph(navController: NavController) {
     navigation(startDestination = Routes.HomeBuyer, route = "buyer") {
@@ -89,26 +107,38 @@ fun NavGraphBuilder.buyerNavGraph(navController: NavController) {
     }
 }
 
-fun NavGraphBuilder.sellerNavGraph(navController: NavController) {
+fun NavGraphBuilder.sellerNavGraph(
+    navController: NavController,
+    sharedUserViewModel: SharedUserViewModel
+) {
     navigation(startDestination = Routes.HomeSeller, route = "seller") {
-        composable(
-            route = "${Routes.HomeSeller}/{sellerId}",
-            arguments = listOf(navArgument("sellerId") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val sellerId = backStackEntry.arguments?.getString("sellerId")!! // Obtén el argumento
-            SellerProductsScreenSeller(navController = navController, sellerId = sellerId)
+        composable(Routes.HomeSeller) {
+            SellerProductsScreenSeller(
+                navController = navController,
+                sharedUserViewModel = sharedUserViewModel
+            )
         }
+
         composable(Routes.CreateProductSeller) {
-            CreateProductPageSeller(navController = navController, sellerId = "mockSellerId")
+            CreateProductPageSeller(
+                navController = navController,
+                sharedUserViewModel = sharedUserViewModel
+            )
         }
+
         composable(Routes.SigupSeller) {
             SignupPageSeller(navController = navController)
         }
+
         composable(Routes.UserProfileSeller) {
-            UserProfileScreenSeller(navController = navController, userViewModel = viewModel())
+            UserProfileScreenSeller(
+                navController = navController,
+                sharedUserViewModel = sharedUserViewModel
+            )
         }
     }
 }
+
 
 
 

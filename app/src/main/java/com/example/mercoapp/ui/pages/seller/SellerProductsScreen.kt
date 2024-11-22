@@ -34,10 +34,13 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import com.example.mercoapp.R
+import com.example.mercoapp.Routes.CreateProductSeller
 import com.example.mercoapp.domain.model.Product
 import com.example.mercoapp.ui.components.BottomNavigationBarr
+import com.example.mercoapp.ui.components.BottomNavigationBarrSeller
 import com.example.mercoapp.ui.components.ProductCard
 import com.example.mercoapp.viewModel.ProductViewModel
+import com.example.mercoapp.viewModel.SharedUserViewModel
 import com.example.mercoapp.viewModel.UserViewModel
 
 
@@ -47,18 +50,21 @@ import com.example.mercoapp.viewModel.UserViewModel
 fun SellerProductsScreenSeller(
     navController: NavController?,
     productViewModel: ProductViewModel = viewModel(),
-    sellerId: String
+    sharedUserViewModel: SharedUserViewModel
 ) {
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabs = listOf("Activos", "No activos", "Todos")
 
-    // Observar productos del vendedor
+    // Observar productos del vendedor y estado de carga
+    val seller by sharedUserViewModel.seller.observeAsState()
     val sellerProducts by productViewModel.sellerProducts.observeAsState(emptyList())
     val isLoading by productViewModel.isLoading.observeAsState(false)
 
-    // Cargar productos al inicio
-    LaunchedEffect(Unit) {
-        productViewModel.getProductsBySeller(sellerId)
+    // Cargar productos al inicio cuando `seller` esté disponible
+    LaunchedEffect(seller) {
+        seller?.let {
+            productViewModel.getProductsBySeller(it.id) // Usa el ID del vendedor del SharedUserViewModel
+        }
     }
 
     Scaffold(
@@ -74,14 +80,14 @@ fun SellerProductsScreenSeller(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { navController?.navigate("createProduct") },
+                onClick = { navController?.navigate(CreateProductSeller) },
                 containerColor = Color(0xFFFF6D00)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Agregar Producto")
             }
         },
         bottomBar = {
-            BottomNavigationBarr(navController, "Inicio")
+            BottomNavigationBarrSeller(navController, "Inicio")
         }
     ) { padding ->
         Column(
@@ -138,49 +144,4 @@ fun SellerProductsScreenSeller(
     }
 }
 
-@Preview(showBackground = true, widthDp = 360, heightDp = 800)
-@Composable
-fun SellerProductsScreenPreview() {
-    // Crear un NavController de prueba
-    val navController = rememberNavController()
-
-    // Crear un ProductViewModel simulado con datos de prueba
-    val fakeProductViewModel = object : ProductViewModel() {
-        private val _sellerProducts = MutableLiveData<List<Product>>(
-            listOf(
-                Product(
-                    id = "1",
-                    name = "Producto Activo 1",
-                    description = "Descripción del producto activo 1",
-                    imageUrl = "https://via.placeholder.com/150",
-                    price = 25.0,
-                    variety = "Vainilla",
-                    isActive = true
-                ),
-                Product(
-                    id = "2",
-                    name = "Producto Inactivo 1",
-                    description = "Descripción del producto inactivo 1",
-                    imageUrl = "https://via.placeholder.com/150",
-                    price = 30.0,
-                    variety = "Chocolate",
-                    isActive = false
-                )
-            )
-        )
-
-        override val sellerProducts: MutableLiveData<List<Product>> = _sellerProducts
-        override val isLoading: MutableLiveData<Boolean> = MutableLiveData(false)
-    }
-
-    // Simula un ID de vendedor
-    val mockSellerId = "seller12345"
-
-    // Llama a la función principal de la pantalla
-    SellerProductsScreenSeller(
-        navController = navController,
-        productViewModel = fakeProductViewModel,
-        sellerId = mockSellerId
-    )
-}
 
