@@ -41,6 +41,10 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.mercoapp.viewModel.AuthViewModel
 import com.example.mercoapp.R
+import com.example.mercoapp.Routes
+import com.example.mercoapp.Routes.HomeBuyer
+import com.example.mercoapp.Routes.HomeSeller
+import com.example.mercoapp.Routes.TypeUser
 import com.example.mercoapp.domain.model.AuthState
 import com.example.mercoapp.ui.components.ActionButton
 import com.example.mercoapp.ui.components.CustomTextField
@@ -55,25 +59,33 @@ fun LoginPage(
     modifier: Modifier = Modifier,
     navController: NavController?,
     authViewModel: AuthViewModel = viewModel(),
-    userViewModel: UserViewModel = viewModel() // Conecta el UserViewModel para usar después del login
+    userViewModel: UserViewModel = viewModel()
 ) {
-    val authState by authViewModel.authState.observeAsState(AuthState.Idle) // Observa el estado de autenticación
+    val authState by authViewModel.authState.observeAsState(AuthState.Idle)
     val userId by authViewModel.userId.observeAsState()
+    val userType by authViewModel.userType.observeAsState()
 
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
 
-    // Reaccionar a los estados de autenticación
-    LaunchedEffect(authState) {
+    // Redirigir según el tipo de usuario
+    LaunchedEffect(authState, userType) {
         when (authState) {
             is AuthState.Success -> {
                 userId?.let { id ->
-                    userViewModel.getUser(id) // Carga los datos del usuario autenticado
-                    navController?.navigate("infoUser") // Navega a la pantalla del perfil de usuario
+                    if (userType == null) {
+                        authViewModel.fetchUserType(id) // Determina si es buyer o seller
+                    } else {
+                        when (userType) {
+                            "buyer" -> navController?.navigate(Routes.HomeBuyer)
+                            "seller" -> navController?.navigate("${Routes.HomeSeller}/$id") // Navega con el ID
+                            else -> navController?.navigate(Routes.TypeUser)
+                        }
+                    }
                 }
             }
             is AuthState.Error -> {
-                // Manejo de error: Puedes agregar lógica adicional aquí si es necesario
+                // Maneja el error aquí
             }
             else -> {}
         }
@@ -86,13 +98,7 @@ fun LoginPage(
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Encabezado
-        Header(
-            navController = navController,
-            "Inicio de sesión",
-            "mercoInit"
-        )
-
+        Header(navController = navController, "Inicio de sesión", Routes.MercoInit)
         Spacer(modifier = Modifier.height(30.dp))
 
         Image(
@@ -111,50 +117,31 @@ fun LoginPage(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Campo de correo electrónico
-            CustomTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = "Correo electrónico"
-            )
-
+            CustomTextField(value = email, onValueChange = { email = it }, label = "Correo electrónico")
             Spacer(modifier = Modifier.height(16.dp))
-
-            // Campo de contraseña
-            PasswordTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = "Contraseña"
-            )
+            PasswordTextField(value = password, onValueChange = { password = it }, label = "Contraseña")
         }
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Mostrar estado de autenticación
         when (authState) {
-            is AuthState.Idle -> Spacer(modifier = Modifier.height(16.dp)) // Estado inicial
-            is AuthState.Loading -> CircularProgressIndicator() // Estado: Cargando
+            is AuthState.Idle -> Spacer(modifier = Modifier.height(16.dp))
+            is AuthState.Loading -> CircularProgressIndicator()
             is AuthState.Error -> Text(
-                text = (authState as AuthState.Error).message, // Mostrar el mensaje de error
+                text = (authState as AuthState.Error).message,
                 color = Color.Red
             )
-            is AuthState.Success -> Spacer(modifier = Modifier.height(16.dp)) // Nada aquí, ya se maneja en LaunchedEffect
+            else -> {}
         }
 
         ActionButton(
             text = "Entrar",
-            onClick = {
-                authViewModel.signin(email, password) // Llama a la función signin del ViewModel
-            },
+            onClick = { authViewModel.signin(email, password) },
             backgroundColor = redMerco
         )
 
         Spacer(modifier = Modifier.height(24.dp))
-
-        // Botón para crear cuenta
-        TextButton(onClick = {
-            navController?.navigate("typeUser")
-        }) {
+        TextButton(onClick = { navController?.navigate(Routes.TypeUser) }) {
             Text(text = "Si no tienes cuenta, crear cuenta")
         }
         Spacer(modifier = Modifier.height(30.dp))

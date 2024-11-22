@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.mercoapp.R
+import com.example.mercoapp.Routes.Login
 import com.example.mercoapp.ui.components.ActionButton
 import com.example.mercoapp.ui.theme.redMerco
 import com.example.mercoapp.viewModel.AuthViewModel
@@ -69,7 +70,7 @@ fun MercoInit(modifier: Modifier = Modifier,navController: NavController?,authVi
 
         ActionButton(
             text = "Ingresar",
-            onClick = { navController?.navigate("login") },
+            onClick = { navController?.navigate(Login) },
             backgroundColor = redMerco
         )
     }

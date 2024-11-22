@@ -31,20 +31,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
 import com.example.mercoapp.R
 import com.example.mercoapp.viewModel.UserViewModel
 
-@Composable
-fun HomePageBuyer(modifier: Modifier= Modifier, navController: NavController,userViewModel: UserViewModel = viewModel()){
-
-    Column {
-        Text(text = "Hola entre")
-    }
-}
 
 
 @Composable
-fun HomeScreen() {
+fun HomeScreenBuyer(
+    modifier: Modifier= Modifier,
+    navController: NavController,
+    userViewModel: UserViewModel = viewModel()
+) {
     Scaffold(
         bottomBar = {
             BottomNavigationBar()
@@ -140,9 +138,17 @@ fun BottomNavigationBar() {
 
 @Preview(showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
-fun HomeScreenPreview() {
-    MaterialTheme {
-        HomeScreen()
-    }
+fun HomeScreenBuyerPreview() {
+    // Simula un NavController para la previsualización
+    val navController = rememberNavController()
+
+    // Llama a la función principal de la pantalla
+    HomeScreenBuyer(
+        modifier = Modifier,
+        navController = navController,
+        userViewModel = object : UserViewModel() {
+            // Opcional: Simula datos o estados para pruebas
+        }
+    )
 }
 

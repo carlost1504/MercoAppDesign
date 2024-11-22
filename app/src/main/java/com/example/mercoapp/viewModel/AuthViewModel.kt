@@ -1,5 +1,6 @@
 package com.example.mercoapp.viewModel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,6 +10,8 @@ import com.example.mercoapp.domain.model.UserBuyer
 import com.example.mercoapp.domain.model.UserSeller
 import com.example.mercoapp.repository.AuthRepository
 import com.example.mercoapp.repository.AuthRepositoryImpl
+import com.example.mercoapp.repository.UserRepository
+import com.example.mercoapp.repository.UserRepositoryImpl
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
@@ -17,7 +20,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 open class AuthViewModel(
-    private val repo: AuthRepository = AuthRepositoryImpl()
+    private val repo: AuthRepository = AuthRepositoryImpl(),
+    private val repoUser: UserRepository = UserRepositoryImpl()
 ) : ViewModel() {
 
     // Estados de autenticación
@@ -128,6 +132,35 @@ open class AuthViewModel(
                     _authState.value = AuthState.Error("Error inesperado: ${ex.localizedMessage}")
                 }
                 ex.printStackTrace()
+            }
+        }
+    }
+
+    private val _userType = MutableLiveData<String?>()
+    val userType: LiveData<String?> = _userType
+
+    fun fetchUserType(userId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val user = repoUser.getUserById(userId)
+
+                withContext(Dispatchers.Main) {
+                    // Asigna el tipo de usuario según el resultado
+                    _userType.value = when (user) {
+                        is UserBuyer -> "buyer"
+                        is UserSeller -> "seller"
+                        else -> {
+                            Log.e("AuthViewModel", "Usuario con ID $userId no encontrado o tipo desconocido")
+                            null // No encontrado o tipo no soportado
+                        }
+                    }
+                }
+            } catch (ex: Exception) {
+                // Maneja el error y registra el mensaje
+                Log.e("AuthViewModel", "Error al identificar el tipo de usuario: ${ex.localizedMessage}")
+                withContext(Dispatchers.Main) {
+                    _userType.value = null // Resetea el tipo de usuario en caso de error
+                }
             }
         }
     }

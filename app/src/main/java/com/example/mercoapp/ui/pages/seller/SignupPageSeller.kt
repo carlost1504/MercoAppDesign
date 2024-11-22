@@ -30,6 +30,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
+import com.example.mercoapp.Routes
+import com.example.mercoapp.Routes.HomeSeller
+import com.example.mercoapp.Routes.TypeUser
 import com.example.mercoapp.domain.model.AuthState
 import com.example.mercoapp.domain.model.UserSeller
 import com.example.mercoapp.ui.components.ActionButton
@@ -82,10 +85,11 @@ fun SignupPageSeller(
     LaunchedEffect(authState) {
         when (authState) {
             is AuthState.Success -> {
-                navController?.navigate("sellerProducts")
+                val sellerId = authViewModel.userId.value ?: ""
+                navController?.navigate("${Routes.HomeSeller}/$sellerId")
             }
             is AuthState.Error -> {
-                // Manejamos los errores si es necesario
+                // Manejo de errores
             }
             else -> {}
         }
@@ -151,7 +155,9 @@ fun SignupPageSeller(
                     color = Color.Red
                 )
             }
-            is AuthState.Success -> {}
+            is AuthState.Success -> {
+                navController?.navigate(HomeSeller)
+            }
         }
 
         item { Spacer(modifier = Modifier.height(24.dp)) }

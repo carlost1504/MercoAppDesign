@@ -17,19 +17,17 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import com.example.mercoapp.viewModel.AuthViewModel
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
+import com.example.mercoapp.Routes.HomeBuyer
 import com.example.mercoapp.domain.model.AuthState
 import com.example.mercoapp.domain.model.UserBuyer
 import com.example.mercoapp.ui.components.ActionButton
@@ -38,7 +36,6 @@ import com.example.mercoapp.ui.components.Header
 import com.example.mercoapp.ui.components.PasswordTextField
 import com.example.mercoapp.ui.components.ProfilePhotoButton
 import com.example.mercoapp.ui.components.DropdownButton
-import com.example.mercoapp.ui.pages.seller.SignupPageSeller
 import com.example.mercoapp.ui.theme.redMerco
 
 @Composable
@@ -76,7 +73,9 @@ fun SignupPageBuyer(
             is AuthState.Error -> {
                 // Manejar errores, si es necesario
             }
-            else -> {}
+            else -> {
+                navController?.navigate(HomeBuyer)
+            }
         }
     }
 
