@@ -54,11 +54,12 @@ fun CreateProductPageSeller(
     var description by rememberSaveable { mutableStateOf("") }
     var price by rememberSaveable { mutableStateOf("") }
     var productPhotoUri by rememberSaveable { mutableStateOf<Uri?>(null) }
-    var variety by rememberSaveable { mutableStateOf("") }
+    var variety by rememberSaveable { mutableStateOf("") } // Asegúrate de que se actualice correctamente
     val varieties = listOf("Vainilla", "Chocolate", "Fresa")
 
     // Observar el vendedor desde el SharedUserViewModel
     val seller by sharedUserViewModel.seller.observeAsState()
+    val isLoading by productViewModel.isLoading.observeAsState(false)
 
     // Lanzador para seleccionar imagen
     val photoLauncher = rememberLauncherForActivityResult(
@@ -79,116 +80,141 @@ fun CreateProductPageSeller(
             )
         },
         content = { padding ->
-            LazyColumn(
-                modifier = modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                item { Spacer(modifier = Modifier.height(30.dp)) }
-
-                // Campos para ingresar información
-                item {
-                    CustomTextField(
-                        value = name,
-                        onValueChange = { name = it },
-                        label = "Nombre del producto"
-                    )
+            if (isLoading) {
+                // Mostrar indicador de carga
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
                 }
+            } else {
+                LazyColumn(
+                    modifier = modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    item { Spacer(modifier = Modifier.height(30.dp)) }
 
-                item { Spacer(modifier = Modifier.height(16.dp)) }
-
-                item {
-                    CustomTextField(
-                        value = description,
-                        onValueChange = { description = it },
-                        label = "Descripción del producto"
-                    )
-                }
-
-                item { Spacer(modifier = Modifier.height(16.dp)) }
-
-                item {
-                    CustomTextField(
-                        value = price,
-                        onValueChange = { price = it.filter { char -> char.isDigit() || char == '.' } },
-                        label = "Precio del producto"
-                    )
-                }
-
-                item { Spacer(modifier = Modifier.height(16.dp)) }
-
-                // Dropdown para variedades
-                item {
-                    DropdownButton(
-                        items = varieties
-                    )
-                }
-
-                item { Spacer(modifier = Modifier.height(16.dp)) }
-
-                // Botón para cargar imagen
-                item {
-                    ProfilePhotoButton(launcher = photoLauncher, "Cargar imagen del producto")
-                }
-
-                // Mostrar imagen seleccionada
-                item {
-                    productPhotoUri?.let { uri ->
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Image(
-                            painter = rememberImagePainter(data = uri),
-                            contentDescription = "Imagen del producto",
-                            modifier = Modifier
-                                .size(128.dp)
-                                .clip(CircleShape)
+                    // Campos de entrada
+                    item {
+                        CustomTextField(
+                            value = name,
+                            onValueChange = { name = it },
+                            label = "Nombre del producto"
                         )
                     }
-                }
 
-                item { Spacer(modifier = Modifier.height(24.dp)) }
+                    item { Spacer(modifier = Modifier.height(16.dp)) }
 
-                item {
-                    ActionButton(
-                        text = "Guardar producto",
-                        onClick = {
-                            if (name.isNotEmpty() && description.isNotEmpty() && price.isNotEmpty() && variety.isNotEmpty() && productPhotoUri != null) {
-                                val priceValue = price.toDoubleOrNull()
-                                if (priceValue == null || priceValue <= 0) {
-                                    // Llama a una función en el ViewModel para manejar la validación
-                                    productViewModel.onValidationError("Por favor ingrese un precio válido.")
-                                    return@ActionButton
-                                }
+                    item {
+                        CustomTextField(
+                            value = description,
+                            onValueChange = { description = it },
+                            label = "Descripción del producto"
+                        )
+                    }
 
-                                seller?.let { currentSeller ->
-                                    productViewModel.uploadProductImage(productPhotoUri!!) { result ->
-                                        result.onSuccess { imageUrl ->
-                                            val product = Product(
-                                                id = UUID.randomUUID().toString(),
-                                                name = name,
-                                                description = description,
-                                                imageUrl = imageUrl,
-                                                price = priceValue,
-                                                variety = variety,
-                                                isActive = true
-                                            )
-                                            productViewModel.addProductToSeller(currentSeller.id, product)
-                                            navController?.navigateUp()
-                                        }.onFailure {
-                                            productViewModel.onImageUploadError(it.message ?: "Error desconocido al subir la imagen.")
-                                        }
-                                    }
-                                } ?: productViewModel.onValidationError("No se encontró el vendedor. Intente nuevamente.")
-                            } else {
-                                productViewModel.onValidationError("Por favor complete todos los campos y seleccione una imagen.")
+                    item { Spacer(modifier = Modifier.height(16.dp)) }
+
+                    item {
+                        CustomTextField(
+                            value = price,
+                            onValueChange = { price = it.filter { char -> char.isDigit() || char == '.' } },
+                            label = "Precio del producto"
+                        )
+                    }
+
+                    item { Spacer(modifier = Modifier.height(16.dp)) }
+
+                    // Dropdown de variedades
+                    item {
+                        DropdownButton(
+                            items = varieties,
+                            selectedValue = variety,
+                            onValueSelected = { selectedVariety ->
+                                variety = selectedVariety // Actualiza el valor seleccionado
                             }
-                        },
-                        backgroundColor = Color.Blue
-                    )
-                }
+                        )
+                    }
 
-                item { Spacer(modifier = Modifier.height(30.dp)) }
+                    item { Spacer(modifier = Modifier.height(16.dp)) }
+
+                    // Botón para cargar imagen
+                    item {
+                        ProfilePhotoButton(
+                            launcher = photoLauncher,
+                            "Cargar imagen del producto"
+                        )
+                    }
+
+                    // Mostrar imagen seleccionada
+                    item {
+                        productPhotoUri?.let { uri ->
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Image(
+                                painter = rememberImagePainter(data = uri),
+                                contentDescription = "Imagen del producto",
+                                modifier = Modifier
+                                    .size(128.dp)
+                                    .clip(CircleShape)
+                            )
+                        }
+                    }
+
+                    item { Spacer(modifier = Modifier.height(24.dp)) }
+
+                    // Botón para guardar producto
+                    item {
+                        ActionButton(
+                            text = "Guardar producto",
+                            onClick = {
+                                if (name.isNotEmpty() && description.isNotEmpty() && price.isNotEmpty() && variety.isNotEmpty() && productPhotoUri != null) {
+                                    val priceValue = price.toDoubleOrNull()
+                                    if (priceValue == null || priceValue <= 0) {
+                                        productViewModel.onValidationError("Por favor ingrese un precio válido.")
+                                        return@ActionButton
+                                    }
+
+                                    seller?.let { currentSeller ->
+                                        productViewModel.uploadProductImage(productPhotoUri!!) { result ->
+                                            result.onSuccess { imageUrl ->
+                                                val product = Product(
+                                                    id = UUID.randomUUID().toString(),
+                                                    name = name,
+                                                    description = description,
+                                                    imageUrl = imageUrl,
+                                                    price = priceValue,
+                                                    variety = variety,
+                                                    isActive = true
+                                                )
+                                                productViewModel.addProductToSeller(currentSeller.id, product) { addResult ->
+                                                    addResult.onSuccess {
+                                                        sharedUserViewModel.addProductToSeller(product)
+                                                        navController?.navigateUp()
+                                                    }.onFailure { e ->
+                                                        productViewModel.onValidationError(e.message ?: "Error al agregar el producto.")
+                                                    }
+                                                }
+                                            }.onFailure {
+                                                productViewModel.onImageUploadError(it.message ?: "Error desconocido al subir la imagen.")
+                                            }
+                                        }
+                                    } ?: productViewModel.onValidationError("No se encontró el vendedor. Intente nuevamente.")
+                                } else {
+                                    productViewModel.onValidationError("Por favor complete todos los campos y seleccione una imagen.")
+                                }
+                            },
+                            backgroundColor = Color.Blue
+                        )
+                    }
+
+                    item { Spacer(modifier = Modifier.height(30.dp)) }
+                }
             }
         }
     )

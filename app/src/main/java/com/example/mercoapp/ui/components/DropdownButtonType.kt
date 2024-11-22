@@ -79,3 +79,65 @@ fun DropdownButton(
         }
     }
 }
+
+@Composable
+fun DropdownButton(
+    items: List<String>,
+    selectedValue: String,
+    onValueSelected: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Campo de texto que muestra el valor seleccionado
+        OutlinedTextField(
+            value = selectedValue,
+            onValueChange = {},
+            enabled = false, // Deshabilitado para evitar edición manual
+            readOnly = true, // Solo lectura
+            label = { Text("Seleccionar variedad") }, // Etiqueta
+            modifier = modifier
+                .clickable { expanded = true } // Abre el menú al hacer clic
+                .padding(horizontal = 20.dp)
+                .fillMaxWidth(0.9f), // Ajusta el ancho
+            trailingIcon = {
+                Icon(
+                    Icons.Default.ArrowDropDown,
+                    contentDescription = "Abrir menú desplegable"
+                )
+            },
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = MaterialTheme.colors.primary,  // Borde enfocado con el color del tema
+                unfocusedBorderColor = MaterialTheme.colors.onSurface, // Borde no enfocado
+                textColor = MaterialTheme.colors.onBackground  // Color del texto
+            )
+        )
+
+        // Menú desplegable
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }, // Cierra el menú al hacer clic fuera
+            modifier = Modifier
+                .fillMaxWidth(0.9f) // Ajusta el ancho al del campo de texto
+        ) {
+            items.forEach { item ->
+                DropdownMenuItem(
+                    onClick = {
+                        onValueSelected(item) // Actualiza el valor seleccionado
+                        expanded = false // Cierra el menú
+                    }
+                ) {
+                    Text(
+                        text = item,
+                        color = MaterialTheme.colors.onSurface
+                    )
+                }
+            }
+        }
+    }
+}

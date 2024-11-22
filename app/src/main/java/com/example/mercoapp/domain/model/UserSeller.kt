@@ -15,5 +15,5 @@ data class UserSeller(
     var storePhotoUri: String = "",
     var storeDescription: String = "",
     var addressShops: String = "",
-    var productIds: MutableList<String> = mutableListOf() // Array de IDs de productos
+    var productIds: List<Any> = mutableListOf() // Array de IDs de productos
 )

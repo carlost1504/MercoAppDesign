@@ -1,5 +1,6 @@
 package com.example.mercoapp.repository
 
+import android.util.Log
 import com.example.mercoapp.domain.model.UserBuyer
 import com.example.mercoapp.domain.model.UserSeller
 import com.example.mercoapp.service.UserServices
@@ -8,80 +9,104 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
 interface UserRepository {
-    suspend fun createBuyer(buyer: UserBuyer)      // Crear un comprador
-    suspend fun createSeller(seller: UserSeller)   // Crear un vendedor
-    suspend fun getCurrentUser(): Any?             // Obtener el usuario actual (podría ser Buyer o Seller)
-    suspend fun getUserById(userId: String): Any?  // Obtener usuario específico por ID
-    suspend fun updateUser(user: Any)              // Actualizar usuario (comprador o vendedor)
-    suspend fun addProductToSeller(sellerId: String, productId: String)
-    suspend fun getProductsBySeller(sellerId: String): List<String>
+    suspend fun createBuyer(buyer: UserBuyer) // Crear un comprador
+    suspend fun createSeller(seller: UserSeller) // Crear un vendedor
+    suspend fun getCurrentUser(): Any? // Obtener el usuario actual (Buyer o Seller)
+    suspend fun getUserById(userId: String): Any? // Obtener usuario específico por ID
+    suspend fun updateUser(user: Any) // Actualizar usuario (Buyer o Seller)
+    suspend fun addProductToSeller(sellerId: String, productId: String) // Asociar producto al vendedor
+    suspend fun getProductsBySeller(sellerId: String): List<String> // Obtener productos asociados al vendedor
 }
 
 class UserRepositoryImpl(
     private val userServices: UserServices = UserServicesImpl()
 ) : UserRepository {
 
+    /**
+     * Obtener lista de productos asociados al vendedor por su ID.
+     */
     override suspend fun getProductsBySeller(sellerId: String): List<String> {
-        // Obtén el vendedor por su ID
         val seller = userServices.getSellerById(sellerId)
-        return seller?.productIds ?: emptyList() // Devuelve la lista de productos o una lista vacía
+        // Asegúrate de convertir los IDs a Strings si vienen como Any
+        return seller?.productIds?.mapNotNull { it.toString() } ?: emptyList()
     }
 
-    // Crear un comprador y almacenarlo en Firestore
+    /**
+     * Crear un comprador y almacenarlo en Firestore.
+     */
     override suspend fun createBuyer(buyer: UserBuyer) {
         userServices.createBuyer(buyer)
     }
 
-    // Crear un vendedor y almacenarlo en Firestore
+    /**
+     * Crear un vendedor y almacenarlo en Firestore.
+     */
     override suspend fun createSeller(seller: UserSeller) {
         userServices.createSeller(seller)
     }
 
-    // Obtener el usuario actual de Firebase Authentication
+    /**
+     * Obtener el usuario actual autenticado.
+     */
     override suspend fun getCurrentUser(): Any? {
         val uid = Firebase.auth.currentUser?.uid
 
-        // Verificamos si el usuario está autenticado
         return uid?.let {
-            // Primero buscamos en la colección de compradores
+            // Buscar en la colección de compradores
             val buyer = userServices.getBuyerById(it)
             if (buyer != null) {
-                return buyer // Si encontramos un comprador, lo retornamos
+                return buyer // Si es un comprador, lo retorna
             }
 
-            // Si no es comprador, buscamos en la colección de vendedores
+            // Si no es comprador, buscar en la colección de vendedores
             val seller = userServices.getSellerById(it)
             return seller ?: run {
-                null // Si no encontramos ni comprador ni vendedor, retornamos null
+                Log.e("UserRepositoryImpl", "Usuario actual no encontrado en compradores ni vendedores")
+                null // Si no se encuentra, retorna null
             }
         }
     }
-    // Obtener un usuario específico por su ID
+
+    /**
+     * Obtener un usuario específico por su ID.
+     */
     override suspend fun getUserById(userId: String): Any? {
-        // Primero, buscar en la colección de compradores
+        // Buscar en la colección de compradores
         val buyer = userServices.getBuyerById(userId)
         if (buyer != null) return buyer
 
-        // Si no es un comprador, buscar en la colección de vendedores
+        // Buscar en la colección de vendedores
         val seller = userServices.getSellerById(userId)
         return seller
     }
-    // Actualizar la información de un usuario (comprador o vendedor)
+
+    /**
+     * Actualizar información de un usuario (comprador o vendedor).
+     */
     override suspend fun updateUser(user: Any) {
         when (user) {
-            is UserBuyer -> userServices.updateBuyer(user)   // Actualizar comprador
+            is UserBuyer -> userServices.updateBuyer(user) // Actualizar comprador
             is UserSeller -> userServices.updateSeller(user) // Actualizar vendedor
-            else -> throw IllegalArgumentException("Tipo de usuario no soportado")
+            else -> throw IllegalArgumentException("Tipo de usuario no soportado: ${user::class.java}")
         }
     }
 
+    /**
+     * Agregar un producto al vendedor y actualizar Firestore.
+     */
     override suspend fun addProductToSeller(sellerId: String, productId: String) {
-        val seller = userServices.getSellerById(sellerId) // Obtén el vendedor actual
+        val seller = userServices.getSellerById(sellerId) // Obtener el vendedor
         seller?.let {
-            it.productIds.add(productId) // Agrega el ID del producto a la lista
-            userServices.updateSeller(it) // Actualiza el vendedor en Firestore
-        } ?: throw Exception("Seller not found")
+            if (!it.productIds.mapNotNull { id -> id.toString() }.contains(productId)) {
+                // Crear una nueva lista con el producto agregado (inmutabilidad de la data class)
+                val updatedSeller = it.copy(productIds = it.productIds + productId)
+                userServices.updateSeller(updatedSeller) // Actualizar vendedor en Firestore
+                Log.d("UserRepositoryImpl", "Producto $productId agregado al vendedor $sellerId")
+            } else {
+                Log.w("UserRepositoryImpl", "El producto $productId ya está asociado al vendedor $sellerId")
+            }
+        } ?: throw Exception("Vendedor con ID $sellerId no encontrado")
     }
-
 }
+
 
