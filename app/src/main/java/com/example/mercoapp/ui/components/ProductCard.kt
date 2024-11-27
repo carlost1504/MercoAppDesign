@@ -35,7 +35,7 @@ import androidx.compose.ui.draw.clip
 @Composable
 fun ProductCard(
     product: Product,
-    onDeleteClick: () -> Unit
+      onDeleteClick: () -> Unit
 ) {
     Card(
         modifier = Modifier

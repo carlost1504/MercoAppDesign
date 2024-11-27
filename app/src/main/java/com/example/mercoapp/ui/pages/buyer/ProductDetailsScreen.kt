@@ -5,47 +5,49 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
-import com.example.mercoapp.R
-import com.example.mercoapp.ui.components.BottomNavigationBarr
-import com.example.mercoapp.viewModel.UserViewModel
+import com.example.mercoapp.ui.components.BottomNavigationBarrBuyer
+import com.example.mercoapp.viewModel.SharedUserViewModel
+
 
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProductDetailsScreenBuyer(navController: NavController?) {
+fun ProductDetailsScreenBuyer(
+    navController: NavController?,
+    productId: String,
+    sharedUserViewModel: SharedUserViewModel
+) {
+    // Observa el producto desde SharedUserViewModel
+    val sellerProducts = sharedUserViewModel.seller.value?.productIds ?: emptyList()
+    val product = sellerProducts.find { it.id == productId }
+    val isLoading by sharedUserViewModel.isLoading.observeAsState(false)
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Cake Red Velvet", style = MaterialTheme.typography.titleMedium) },
+                title = { Text(product?.name ?: "Detalles del Producto", style = MaterialTheme.typography.titleMedium) },
                 navigationIcon = {
                     IconButton(onClick = { navController?.navigateUp() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
@@ -59,65 +61,78 @@ fun ProductDetailsScreenBuyer(navController: NavController?) {
             )
         },
         bottomBar = {
-            BottomNavigationBarr(navController, "Producto")
+            BottomNavigationBarrBuyer(
+                navController = navController,
+                currentScreen = "Tienda",
+                sharedUserViewModel = sharedUserViewModel
+            )
         }
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp)
-        ) {
-            item {
-                ProductImageSection(imageUrl = "https://via.placeholder.com/150") // URL de ejemplo
-                Spacer(modifier = Modifier.height(16.dp))
+        if (isLoading) {
+            // Mostrar indicador de carga
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
-
-            item {
-                ProductInfoSection(
-                    title = "Cake Red Velvet",
-                    price = "20.000 $",
-                    description = "Capas de bizcocho red velvet, cubiertas con cobertura de queso crema."
-                )
-                Spacer(modifier = Modifier.height(16.dp))
+        } else if (product == null) {
+            // Mostrar mensaje si el producto no se encuentra
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("Producto no encontrado", style = MaterialTheme.typography.bodyMedium)
             }
-
-            item {
-                ExpandableSection(title = "Detalles del artículo") {
-                    Text("Información sobre el tamaño, ingredientes, etc.")
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 16.dp)
+            ) {
+                item {
+                    ProductImageSection(imageUrl = product.imageUrl)
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
-                Spacer(modifier = Modifier.height(8.dp))
 
-                ExpandableSection(title = "Información de la tienda") {
-                    Text("Detalles de la tienda, ubicación y políticas.")
+                item {
+                    ProductInfoSection(
+                        title = product.name,
+                        price = "${product.price} $",
+                        description = product.description
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
-                Spacer(modifier = Modifier.height(8.dp))
 
-                ExpandableSection(title = "Reseñas de la marca") {
-                    Text("Opiniones y calificaciones de otros usuarios.")
+                item {
+                    ExpandableSection(title = "Detalles del producto") {
+                        Text("Variedad: ${product.variety}")
+                        Text("Estado: ${if (product.isActive) "Activo" else "No activo"}")
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-            }
 
-            item {
-                RecommendedProductsSection()
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            item {
-                Button(
-                    onClick = { /* Acción para agregar al carrito */ },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
-                ) {
-                    Text("Agregar a carrito", color = Color.White)
+                item {
+                    Button(
+                        onClick = { /* Acción para agregar al carrito */ },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 16.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
+                    ) {
+                        Text("Agregar a carrito", color = Color.White)
+                    }
                 }
             }
         }
     }
 }
+
 
 @Composable
 fun ProductImageSection(imageUrl: String) {
@@ -210,13 +225,5 @@ fun RecommendedProductItem(imageUrl: String, productName: String, productPrice: 
 }
 
 
-@Preview(showBackground = true, widthDp = 360, heightDp = 800)
-@Composable
-fun ProductDetailsScreenPreview() {
-    // Creamos un NavController simulado para que la pantalla funcione correctamente
-    val navController = rememberNavController()
-    // Llamamos a la función principal de la pantalla con el NavController de prueba
 
-    ProductDetailsScreenBuyer(navController = navController)
-}
 

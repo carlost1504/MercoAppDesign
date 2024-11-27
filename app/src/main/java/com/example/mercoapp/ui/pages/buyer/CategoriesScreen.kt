@@ -15,10 +15,13 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material3.Text
 import androidx.compose.material3.IconButton
+import androidx.navigation.NavController
+import com.example.mercoapp.ui.components.BottomNavigationBarrBuyer
+import com.example.mercoapp.viewModel.SharedUserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoriesScreenBuyer() {
+fun CategoriesScreenBuyer(navController: NavController?, sharedUserViewModel: SharedUserViewModel) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -31,7 +34,7 @@ fun CategoriesScreenBuyer() {
             )
         },
         bottomBar = {
-            BottomNavigationBar()
+            BottomNavigationBarrBuyer(navController, "Perfil", sharedUserViewModel)
         }
     ) { padding ->
         Column(
@@ -110,10 +113,4 @@ fun CategoryItem(name: String) {
 
 
 
-@Preview(showBackground = true, widthDp = 360, heightDp = 800)
-@Composable
-fun CategoriesScreenPreview() {
-    MaterialTheme {
-        CategoriesScreenBuyer()
-    }
-}
+

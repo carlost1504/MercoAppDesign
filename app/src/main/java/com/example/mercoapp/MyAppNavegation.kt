@@ -40,6 +40,7 @@ fun MainNavGraph(
     val navController = rememberNavController()
     val sharedUserViewModel: SharedUserViewModel = viewModel() // Instancia del SharedUserViewModel
 
+
     NavHost(
         navController = navController,
         startDestination = Routes.MercoInit
@@ -64,47 +65,83 @@ fun MainNavGraph(
         }
 
         // Subgrafo de Buyer
-        buyerNavGraph(navController)
+        buyerNavGraph(navController,sharedUserViewModel)
 
         // Subgrafo de Seller
         sellerNavGraph(navController, sharedUserViewModel) // Pasamos el ViewModel compartido
     }
 }
 
-fun NavGraphBuilder.buyerNavGraph(navController: NavController) {
+fun NavGraphBuilder.buyerNavGraph(navController: NavController, sharedUserViewModel: SharedUserViewModel) {
     navigation(startDestination = Routes.HomeBuyer, route = "buyer") {
         composable(Routes.HomeBuyer) {
-            HomeScreenBuyer(navController = navController)
+            HomeScreenBuyer(
+                navController = navController,
+                sharedUserViewModel = sharedUserViewModel
+            )
         }
         composable(Routes.CartBuyer) {
-            CartScreenBuyer(navController = navController)
+            CartScreenBuyer(
+                navController = navController,
+                sharedUserViewModel = sharedUserViewModel
+            )
         }
         composable(Routes.CategoriesBuyer) {
-            CategoriesScreenBuyer()
+            CategoriesScreenBuyer(
+                navController = navController,
+                sharedUserViewModel = sharedUserViewModel
+            )
         }
         composable(Routes.FavoriteStoresBuyer) {
-            FavoriteStoresScreenBuyer(navController = navController)
+            FavoriteStoresScreenBuyer(
+                navController = navController,
+                sharedUserViewModel= sharedUserViewModel
+            )
         }
         composable(Routes.OrderHistoryBuyer) {
-            OrderHistoryScreenBuyer(navController = navController)
+            OrderHistoryScreenBuyer(
+                navController = navController,
+                sharedUserViewModel = sharedUserViewModel
+            )
         }
-        composable(Routes.ProductDetailsBuyer) {
-            ProductDetailsScreenBuyer(navController = navController)
+        composable(
+            route = "${Routes.ProductDetailsBuyer}/{productId}",
+            arguments = listOf(navArgument("productId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val productId = backStackEntry.arguments?.getString("productId")!!
+            ProductDetailsScreenBuyer(
+                navController = navController,
+                productId = productId,
+                sharedUserViewModel = sharedUserViewModel
+            )
         }
         composable(Routes.OrderDetailBuyer) {
-            OrderDetailScreenBuyer(navController = navController)
+            OrderDetailScreenBuyer(
+                navController = navController,
+                sharedUserViewModel = sharedUserViewModel
+            )
         }
         composable(Routes.OrderConfirmationBuyer) {
-            OrderConfirmationScreenBuyer(navController = navController)
+            OrderConfirmationScreenBuyer(
+                navController = navController,
+                sharedUserViewModel = sharedUserViewModel
+            )
         }
         composable(Routes.StoreBuyer) {
-            StoreScreenBuyer(navController = navController)
+            StoreScreenBuyer(
+                navController = navController,
+                sharedUserViewModel = sharedUserViewModel
+            )
         }
         composable(Routes.UserProfileBuyer) {
-            UserProfileScreenBuyer(navController = navController)
+            UserProfileScreenBuyer(
+                navController = navController,
+                sharedUserViewModel = sharedUserViewModel
+            )
         }
     }
 }
+
 
 fun NavGraphBuilder.sellerNavGraph(
     navController: NavController,

@@ -19,33 +19,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import coil.compose.rememberImagePainter
-import com.example.mercoapp.R
-import com.example.mercoapp.ui.components.BottomNavigationBarr
-import com.example.mercoapp.viewModel.UserViewModel
+import com.example.mercoapp.ui.components.BottomNavigationBarrBuyer
+import com.example.mercoapp.viewModel.SharedUserViewModel
 
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OrderHistoryScreenBuyer(navController: NavController?) {
+fun OrderHistoryScreenBuyer(navController: NavController?,sharedUserViewModel: SharedUserViewModel) {
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabs = listOf("Recogido", "En Espera", "Cancelado")
 
@@ -61,7 +49,7 @@ fun OrderHistoryScreenBuyer(navController: NavController?) {
             )
         },
         bottomBar = {
-            BottomNavigationBarr(navController, "Perfil")
+            BottomNavigationBarrBuyer(navController, "Perfil", sharedUserViewModel)
         }
     ) { padding ->
         Column(
@@ -148,5 +136,5 @@ fun OrderHistoryScreenPreview() {
     // Simulamos el NavController para la previsualización
     val navController = rememberNavController()
 
-    OrderHistoryScreenBuyer(navController = navController)
+    OrderHistoryScreenBuyer(navController = navController,sharedUserViewModel= SharedUserViewModel())
 }

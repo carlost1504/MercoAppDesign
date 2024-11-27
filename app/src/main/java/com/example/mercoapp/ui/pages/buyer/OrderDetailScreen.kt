@@ -1,5 +1,6 @@
 package com.example.mercoapp.ui.pages.buyer
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -29,6 +30,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -39,17 +41,29 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import com.example.mercoapp.R
-import com.example.mercoapp.domain.model.OrderItem
-import com.example.mercoapp.ui.components.BottomNavigationBarr
-import com.example.mercoapp.viewModel.UserViewModel
+import com.example.mercoapp.Routes
+import com.example.mercoapp.domain.model.Product
+import com.example.mercoapp.ui.components.BottomNavigationBarrBuyer
+import com.example.mercoapp.viewModel.SharedUserViewModel
+import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OrderDetailScreenBuyer(navController: NavController?) {
+fun OrderDetailScreenBuyer(
+    navController: NavController?,
+    sharedUserViewModel: SharedUserViewModel
+) {
+    // Observa los productos seleccionados (o el carrito) desde el ViewModel
+    val selectedProducts by sharedUserViewModel.selectedProducts.observeAsState(emptyList())
+    val quantities by sharedUserViewModel.productQuantities.observeAsState(mapOf())
+
+    // Calcula el total de la orden
+    val totalAmount = selectedProducts.sumOf { it.price * (quantities[it.id] ?: 1) }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Detalles de pedido", style = MaterialTheme.typography.titleMedium) },
+                title = { Text("Detalles del Pedido", style = MaterialTheme.typography.titleMedium) },
                 navigationIcon = {
                     IconButton(onClick = { navController?.navigateUp() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
@@ -58,7 +72,7 @@ fun OrderDetailScreenBuyer(navController: NavController?) {
             )
         },
         bottomBar = {
-            BottomNavigationBarr(navController, "Perfil")
+            BottomNavigationBarrBuyer(navController, "Perfil", sharedUserViewModel)
         }
     ) { padding ->
         Column(
@@ -69,10 +83,8 @@ fun OrderDetailScreenBuyer(navController: NavController?) {
         ) {
             // Encabezado del Pedido
             OrderHeader(
-                orderNumber = "N°1947034",
-                date = "05-12-2019",
-                status = "Recogido",
-                itemsCount = 3
+                itemsCount = selectedProducts.size,
+                totalAmount = totalAmount
             )
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -81,56 +93,54 @@ fun OrderDetailScreenBuyer(navController: NavController?) {
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(getSampleOrderItems()) { item ->
-                    OrderItemDetail(item)
+                items(selectedProducts) { product ->
+                    OrderItemDetail(product = product, quantity = quantities[product.id] ?: 1)
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Información adicional del pedido
-            OrderInfoSection(
-                deliveryAddresses = listOf(
-                    "Dirección: Carrera 103 # 13 - 20",
-                    "Dirección: Carrera 122 # 16 - 10"
-                ),
-                totalAmount = "133$"
-            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Botón para Comentarios
+            // Botón para confirmar el pedido
             Button(
-                onClick = { /* Acción para agregar comentario */ },
+                onClick = {
+                    val selectedProducts = sharedUserViewModel.selectedProducts.value ?: emptyList()
+                    val quantities = sharedUserViewModel.productQuantities.value ?: emptyMap()
+
+                    if (selectedProducts.isNotEmpty() && quantities.isNotEmpty()) {
+                        sharedUserViewModel.createOrder() // Crea la orden usando los datos internos
+                        navController?.navigate(Routes.OrderConfirmationBuyer) // Navega a la pantalla de confirmación
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
             ) {
-                Text("Comentario", color = Color.White)
+                Text("Confirmar Pedido", color = Color.White)
             }
+
+
         }
     }
 }
 
 @Composable
-fun OrderHeader(orderNumber: String, date: String, status: String, itemsCount: Int) {
+fun OrderHeader(itemsCount: Int, totalAmount: Double) {
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(text = "Orden $orderNumber", fontWeight = FontWeight.Bold)
-            Text(text = date, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+            Text(text = "Resumen del Pedido", fontWeight = FontWeight.Bold)
+            Text(text = "Total: $${"%.2f".format(totalAmount)}", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
         }
         Spacer(modifier = Modifier.height(8.dp))
         Text(text = "$itemsCount elementos", style = MaterialTheme.typography.bodyMedium)
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = status, color = Color(0xFF4CAF50), fontWeight = FontWeight.Bold)
     }
 }
 
 @Composable
-fun OrderItemDetail(item: OrderItem) {
+fun OrderItemDetail(product: Product, quantity: Int) {
     Card(
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier
@@ -140,51 +150,22 @@ fun OrderItemDetail(item: OrderItem) {
     ) {
         Row(modifier = Modifier.padding(16.dp)) {
             Image(
-                painter = rememberImagePainter(data = item.imageUrl),
+                painter = rememberImagePainter(data = product.imageUrl),
                 contentDescription = "Imagen del producto",
                 modifier = Modifier.size(64.dp)
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = item.name, fontWeight = FontWeight.Bold)
-                Text(text = "Variedad: ${item.variety}", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
-                Text(text = "Unidades: ${item.quantity}", style = MaterialTheme.typography.bodyMedium)
+                Text(text = product.name, fontWeight = FontWeight.Bold)
+                Text(text = "Variedad: ${product.variety}", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+                Text(text = "Unidades: $quantity", style = MaterialTheme.typography.bodyMedium)
             }
-            Text(text = item.price, fontWeight = FontWeight.Bold, color = Color.Gray)
+            Text(text = "$${"%.2f".format(product.price * quantity)}", fontWeight = FontWeight.Bold, color = Color.Gray)
         }
     }
 }
 
-@Composable
-fun OrderInfoSection(deliveryAddresses: List<String>, totalAmount: String) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(text = "Información del pedido", fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(8.dp))
-        deliveryAddresses.forEach { address ->
-            Text(text = address, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(text = "Monto total: $totalAmount", fontWeight = FontWeight.Bold, color = Color.Gray)
-    }
-}
 
 
 
-// Ejemplo de datos de los artículos del pedido
-fun getSampleOrderItems(): List<OrderItem> {
-    return listOf(
-        OrderItem(name = "Torta + Helado", variety = "Vainilla", quantity = 1, price = "30.000", imageUrl = "https://via.placeholder.com/150"),
-        OrderItem(name = "Porción cheesecake", variety = "Fresa", quantity = 1, price = "11.000", imageUrl = "https://via.placeholder.com/150"),
-        OrderItem(name = "Empanadas y aborrajados", variety = "Mixta", quantity = 1, price = "5.5$", imageUrl = "https://via.placeholder.com/150")
-    )
-}
 
-
-@Preview(showBackground = true, widthDp = 360, heightDp = 800)
-@Composable
-fun OrderDetailScreenPreview() {
-    // Simulamos el NavController para la previsualización
-    val navController = rememberNavController()
-
-    OrderDetailScreenBuyer(navController = navController)
-}

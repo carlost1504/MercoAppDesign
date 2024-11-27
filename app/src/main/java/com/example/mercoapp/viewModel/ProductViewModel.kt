@@ -29,6 +29,9 @@ open class ProductViewModel(
     // LiveData para los productos del vendedor
     open val sellerProducts = MutableLiveData<List<Product>>()
 
+    // LiveData para manejar un producto específico
+    val selectedProduct = MutableLiveData<Product?>()
+
     // LiveData para manejar mensajes de error
     private val _errorState = MutableLiveData<String?>()
     val errorState: LiveData<String?> = _errorState
@@ -71,6 +74,50 @@ open class ProductViewModel(
                 withContext(Dispatchers.Main) {
                     onComplete(Result.failure(e))
                 }
+            }
+        }
+    }
+
+    /**
+     * Obtener todos los productos activos.
+     */
+    fun getAllActiveProducts() {
+        viewModelScope.launch(Dispatchers.IO) {
+            isLoading.postValue(true)
+            try {
+                val products = productRepo.getProducts().filter { it.isActive } // Filtra productos activos
+                withContext(Dispatchers.Main) {
+                    sellerProducts.postValue(products) // Reutilizamos `sellerProducts` para guardar productos globales
+                }
+            } catch (e: Exception) {
+                Log.e("ProductViewModel", "Error al obtener productos activos: ${e.localizedMessage}")
+                withContext(Dispatchers.Main) {
+                    sellerProducts.postValue(emptyList()) // En caso de error, lista vacía
+                }
+            } finally {
+                isLoading.postValue(false)
+            }
+        }
+    }
+
+    /**
+     * Obtener un producto por su ID.
+     */
+    fun getProductById(productId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            isLoading.postValue(true)
+            try {
+                val product = productRepo.getProductById(productId)
+                withContext(Dispatchers.Main) {
+                    selectedProduct.postValue(product)
+                }
+            } catch (e: Exception) {
+                Log.e("ProductViewModel", "Error al obtener el producto: ${e.localizedMessage}")
+                withContext(Dispatchers.Main) {
+                    selectedProduct.postValue(null)
+                }
+            } finally {
+                isLoading.postValue(false)
             }
         }
     }
@@ -125,5 +172,6 @@ open class ProductViewModel(
         }
     }
 }
+
 
 

@@ -22,14 +22,15 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.mercoapp.R
-import com.example.mercoapp.ui.components.BottomNavigationBarr
+import com.example.mercoapp.ui.components.BottomNavigationBarrBuyer
+import com.example.mercoapp.viewModel.SharedUserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavoriteStoresScreenBuyer(
 
     navController: NavController?,
-
+    sharedUserViewModel: SharedUserViewModel
     ) {
     Scaffold(
         topBar = {
@@ -43,7 +44,7 @@ fun FavoriteStoresScreenBuyer(
             )
         },
         bottomBar = {
-            BottomNavigationBarr(navController,"Favoritos")
+            BottomNavigationBarrBuyer(navController, "Favoritos", sharedUserViewModel)
         }
     ) { padding ->
         Column(
@@ -129,5 +130,5 @@ fun FavoriteStoreItem(
 @Preview(showBackground = true)
 @Composable
 fun FavoriteStoresScreenPreview() {
-    FavoriteStoresScreenBuyer(navController = rememberNavController())
+    FavoriteStoresScreenBuyer(navController = rememberNavController(),sharedUserViewModel=SharedUserViewModel())
 }
