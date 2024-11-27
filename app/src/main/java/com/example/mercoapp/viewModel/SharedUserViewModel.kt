@@ -237,6 +237,31 @@ class SharedUserViewModel(
             (currentOrder as MutableLiveData).value = orderRepository.getOrderById(orderId)
         }
     }
+
+
+
+
+
+    fun addProductToSeller(product: Product) {
+        val currentSeller = _seller.value
+        if (currentSeller != null) {
+            val updatedProducts = currentSeller.productIds.toMutableList()
+            updatedProducts.add(product) // Agrega el nuevo producto a la lista
+            currentSeller.productIds = updatedProducts // Actualiza la lista
+            _seller.postValue(currentSeller) // Notifica los cambios
+        }
+    }
+
+    fun removeProductFromSeller(product: Product) {
+        val currentSeller = _seller.value
+        if (currentSeller != null) {
+            val updatedProducts = currentSeller.productIds.toMutableList()
+            updatedProducts.remove(product) // Elimina el producto de la lista
+            currentSeller.productIds = updatedProducts // Actualiza la lista
+            _seller.postValue(currentSeller) // Notifica los cambios
+        }
+    }
+
 }
 
 

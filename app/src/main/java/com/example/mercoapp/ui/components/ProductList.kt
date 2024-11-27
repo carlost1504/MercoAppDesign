@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.mercoapp.R
-import com.example.mercoapp.ui.pages.buyer.ProductItem
 
 @Composable
 fun ProductList() {

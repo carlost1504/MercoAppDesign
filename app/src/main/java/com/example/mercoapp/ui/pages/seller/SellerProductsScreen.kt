@@ -35,13 +35,9 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
 import com.example.mercoapp.R
 import com.example.mercoapp.Routes.CreateProductSeller
-import com.example.mercoapp.domain.model.Product
-import com.example.mercoapp.ui.components.BottomNavigationBarr
 import com.example.mercoapp.ui.components.BottomNavigationBarrSeller
 import com.example.mercoapp.ui.components.ProductCard
-import com.example.mercoapp.viewModel.ProductViewModel
 import com.example.mercoapp.viewModel.SharedUserViewModel
-import com.example.mercoapp.viewModel.UserViewModel
 
 
 
