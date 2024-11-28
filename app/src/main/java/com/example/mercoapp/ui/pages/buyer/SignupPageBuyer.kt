@@ -1,6 +1,7 @@
 package com.example.mercoapp.ui.pages.buyer
 
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -64,17 +65,11 @@ fun SignupPageBuyer(
         profilePhotoUri = uri
     }
 
-    // Reaccionar al estado de autenticación
-    LaunchedEffect(authState) {
-        when (authState) {
-            is AuthState.Success -> {
-                navController?.navigate("infoUser") // Navega a la pantalla de información del usuario
-            }
-            is AuthState.Error -> {
-                // Manejar errores, si es necesario
-            }
-            else -> {
-                navController?.navigate(HomeBuyer)
+    // Manejar el estado de autenticación únicamente después de que el usuario presione el botón
+    if (authState is AuthState.Success) {
+        LaunchedEffect(Unit) {
+            navController?.navigate(HomeBuyer) {
+                popUpTo("SignupPageBuyer") { inclusive = true }
             }
         }
     }
@@ -98,7 +93,9 @@ fun SignupPageBuyer(
 
         item {
             DropdownButton(
-                items = documentTypes
+                items = documentTypes,
+                selectedValue = selectedDocumentType,
+                onValueSelected = { selectedDocumentType = it }
             )
         }
 
@@ -131,7 +128,6 @@ fun SignupPageBuyer(
 
         // Manejar el estado de autenticación
         when (authState) {
-            is AuthState.Idle -> {}
             is AuthState.Loading -> item { CircularProgressIndicator() }
             is AuthState.Error -> item {
                 Text(
@@ -139,7 +135,7 @@ fun SignupPageBuyer(
                     color = Color.Red
                 )
             }
-            is AuthState.Success -> {}
+            else -> {}
         }
 
         item { Spacer(modifier = Modifier.height(24.dp)) }
@@ -152,7 +148,7 @@ fun SignupPageBuyer(
                 Spacer(modifier = Modifier.height(16.dp))
                 Image(
                     painter = rememberImagePainter(data = uri),
-                    contentDescription = "Profile Image",
+                    contentDescription = "Foto de perfil",
                     modifier = Modifier.size(128.dp)
                 )
             }
@@ -164,23 +160,28 @@ fun SignupPageBuyer(
             ActionButton(
                 text = "Crear cuenta",
                 onClick = {
-                    if (passwordsMatch) {
-                        // Crear una instancia de UserBuyer con los datos del formulario
-                        val buyer = UserBuyer(
-                            id = "",
-                            name = name,
-                            lastName = lastName,
-                            typeDocument = selectedDocumentType,
-                            document = document,
-                            email = email,
-                            cell = cell,
-                            profilePhotoUri = profilePhotoUri?.toString() ?: "",
-                            password = password
-                        )
-
-                        // Llamar a la función para registrar comprador
-                        authViewModel.signupBuyer(buyer, password)
+                    if (name.isEmpty() || lastName.isEmpty() || selectedDocumentType.isEmpty() ||
+                        document.isEmpty() || email.isEmpty() || password.isEmpty() || !passwordsMatch
+                    ) {
+                        // Manejar error de validación
+                        Log.e("HomeScreenBuyer", "Error")
                     }
+
+                    // Crear una instancia de UserBuyer con los datos del formulario
+                    val buyer = UserBuyer(
+                        id = "",
+                        name = name,
+                        lastName = lastName,
+                        typeDocument = selectedDocumentType,
+                        document = document,
+                        email = email,
+                        cell = cell,
+                        profilePhotoUri = profilePhotoUri?.toString() ?: "",
+                        password = password
+                    )
+
+                    // Llamar a la función para registrar comprador
+                    authViewModel.signupBuyer(buyer, password)
                 },
                 backgroundColor = redMerco
             )
@@ -189,6 +190,7 @@ fun SignupPageBuyer(
         item { Spacer(modifier = Modifier.height(30.dp)) }
     }
 }
+
 
 
 

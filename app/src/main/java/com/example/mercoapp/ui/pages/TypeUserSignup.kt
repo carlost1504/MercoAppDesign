@@ -37,6 +37,7 @@ import androidx.navigation.NavController
 import com.example.mercoapp.R
 import com.example.mercoapp.ui.theme.redMerco
 import androidx.compose.material.Button
+import com.example.mercoapp.Routes
 import com.example.mercoapp.Routes.SigupSeller
 import com.example.mercoapp.ui.components.ActionButton
 import com.example.mercoapp.ui.components.Header
@@ -74,7 +75,7 @@ fun TypeUserSignup(
 
         ActionButton(
             text = "Comprador",
-            onClick = { navController?.navigate("signupBuyer") },
+            onClick = { navController?.navigate(Routes.SigupBuyer) },
             backgroundColor = redMerco
         )
 

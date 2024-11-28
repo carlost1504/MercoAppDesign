@@ -1,6 +1,7 @@
 package com.example.mercoapp.service
 
 import android.net.Uri
+import android.util.Log
 import com.example.mercoapp.domain.model.Product
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -28,7 +29,9 @@ class ProductServiceImpl : ProductService {
 
     override suspend fun getProducts(): List<Product> {
         val snapshot = Firebase.firestore.collection("products").get().await()
-        return snapshot.toObjects(Product::class.java)
+        val products = snapshot.toObjects(Product::class.java)
+        Log.d("ProductService", "Productos recuperados desde Firebase: $products")
+        return products
     }
 
     override suspend fun getProductById(productId: String): Product? {
@@ -41,7 +44,7 @@ class ProductServiceImpl : ProductService {
 
     override suspend fun uploadProductImage(uri: Uri): String {
         val storageRef = storage.reference.child("products/${UUID.randomUUID()}.jpg")
-        val uploadTask = storageRef.putFile(uri).await() // Espera a que se complete la carga
-        return storageRef.downloadUrl.await().toString() // Devuelve la URL de la imagen
+        val uploadTask = storageRef.putFile(uri).await()
+        return storageRef.downloadUrl.await().toString()
     }
 }

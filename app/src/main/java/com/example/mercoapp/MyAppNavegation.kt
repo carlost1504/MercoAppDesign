@@ -22,6 +22,7 @@ import com.example.mercoapp.ui.pages.buyer.OrderConfirmationScreenBuyer
 import com.example.mercoapp.ui.pages.buyer.OrderDetailScreenBuyer
 import com.example.mercoapp.ui.pages.buyer.OrderHistoryScreenBuyer
 import com.example.mercoapp.ui.pages.buyer.ProductDetailsScreenBuyer
+import com.example.mercoapp.ui.pages.buyer.SignupPageBuyer
 import com.example.mercoapp.ui.pages.buyer.StoreScreenBuyer
 import com.example.mercoapp.ui.pages.buyer.UserProfileScreenBuyer
 import com.example.mercoapp.ui.pages.seller.CreateProductPageSeller
@@ -138,6 +139,11 @@ fun NavGraphBuilder.buyerNavGraph(navController: NavController, sharedUserViewMo
                 navController = navController,
                 sharedUserViewModel = sharedUserViewModel
             )
+        }
+
+        // Ruta para el registro de vendedor
+        composable(Routes.SigupBuyer) {
+            SignupPageBuyer(navController = navController)
         }
     }
 }

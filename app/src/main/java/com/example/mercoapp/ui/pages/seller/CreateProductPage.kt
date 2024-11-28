@@ -197,22 +197,18 @@ fun CreateProductPageSeller(
                                                     product
                                                 ) { addResult ->
                                                     addResult.onSuccess {
-                                                        // Actualiza los datos del vendedor
-                                                        sharedUserViewModel.addProductToSeller(
-                                                            product
-                                                        )
+                                                        // Actualiza los datos del vendedor en SharedUserViewModel
+                                                        sharedUserViewModel.addProductToSeller(product)
                                                         navController?.navigateUp()
                                                     }.onFailure { e ->
                                                         productViewModel.onValidationError(
-                                                            e.message
-                                                                ?: "Error al agregar el producto."
+                                                            e.message ?: "Error al agregar el producto."
                                                         )
                                                     }
                                                 }
                                             }.onFailure {
                                                 productViewModel.onImageUploadError(
-                                                    it.message
-                                                        ?: "Error desconocido al subir la imagen."
+                                                    it.message ?: "Error desconocido al subir la imagen."
                                                 )
                                             }
                                         }
@@ -225,6 +221,7 @@ fun CreateProductPageSeller(
                             backgroundColor = Color.Blue
                         )
                     }
+
 
                     item { Spacer(modifier = Modifier.height(30.dp)) }
                 }

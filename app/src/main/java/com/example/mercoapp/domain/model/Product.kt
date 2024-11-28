@@ -8,4 +8,7 @@ data class Product(
     val price: Double, // Asegúrate de que sea Double si `priceValue` es Double
     val variety: String,
     val isActive: Boolean
-)
+){
+    // Constructor sin argumentos requerido por Firebase
+    constructor() : this("", "", "", "", 0.0, "", true)
+}

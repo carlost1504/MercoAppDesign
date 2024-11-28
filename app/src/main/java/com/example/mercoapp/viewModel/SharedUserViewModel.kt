@@ -1,6 +1,7 @@
 package com.example.mercoapp.viewModel
 
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -245,10 +246,24 @@ class SharedUserViewModel(
     fun addProductToSeller(product: Product) {
         val currentSeller = _seller.value
         if (currentSeller != null) {
-            val updatedProducts = currentSeller.productIds.toMutableList()
-            updatedProducts.add(product) // Agrega el nuevo producto a la lista
-            currentSeller.productIds = updatedProducts // Actualiza la lista
-            _seller.postValue(currentSeller) // Notifica los cambios
+            viewModelScope.launch(Dispatchers.IO) {
+                try {
+                    // Actualiza la lista de productos del vendedor
+                    val updatedProducts = currentSeller.productIds.toMutableList()
+                    updatedProducts.add(product)
+                    currentSeller.productIds = updatedProducts
+
+                    // Guarda el cambio en la base de datos
+                    userRepository.updateUser(currentSeller)
+
+                    // Actualiza el estado local
+                    withContext(Dispatchers.Main) {
+                        _seller.postValue(currentSeller)
+                    }
+                } catch (e: Exception) {
+                    Log.e("SharedUserViewModel", "Error al agregar producto: ${e.localizedMessage}")
+                }
+            }
         }
     }
 

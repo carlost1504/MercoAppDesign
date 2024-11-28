@@ -45,13 +45,14 @@ fun BottomNavigationBarrBuyer(
             }
         )
 
-        // Tienda
+        // tienda
         NavigationBarItem(
-            icon = { Icon(Icons.Filled.Menu, contentDescription = "Tienda") },
-            label = { Text("Tienda") },
-            selected = currentScreen == "Tienda",
+            icon = { Icon(Icons.Filled.Menu, contentDescription = "tienda") },
+            label = { Text("tienda") },
+            selected = currentScreen == "tienda",
             onClick = { navController?.navigate(Routes.StoreBuyer) }
         )
+
 
         // Carrito
         NavigationBarItem(
@@ -74,13 +75,7 @@ fun BottomNavigationBarrBuyer(
             icon = { Icon(Icons.Filled.Person, contentDescription = "Perfil") },
             label = { Text("Perfil") },
             selected = currentScreen == "Perfil",
-            onClick = {
-                buyer?.let { // Asegúrate de que buyer no sea nulo
-                    navController?.navigate("${Routes.UserProfileBuyer}/${it.id}") {
-                        popUpTo("${Routes.UserProfileBuyer}/{buyerId}") { inclusive = true }
-                    }
-                }
-            }
+            onClick = { navController?.navigate(Routes.UserProfileBuyer) }
         )
     }
 }

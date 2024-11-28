@@ -16,10 +16,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberImagePainter
+import com.example.mercoapp.Routes
 import com.example.mercoapp.ui.components.BottomNavigationBarrBuyer
 import com.example.mercoapp.viewModel.SharedUserViewModel
 
@@ -31,6 +36,10 @@ fun UserProfileScreenBuyer(
     navController: NavController?,
     sharedUserViewModel: SharedUserViewModel
 ) {
+    // Observa los datos del comprador desde el ViewModel
+    val buyer by sharedUserViewModel.buyer.observeAsState()
+    val isLoading by sharedUserViewModel.isLoading.observeAsState(false)
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -50,32 +59,58 @@ fun UserProfileScreenBuyer(
             )
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.height(16.dp))
-            ProfileHeader(
-                imageUrl = "https://via.placeholder.com/150", // URL de ejemplo para la imagen del perfil
-                name = "Laura",
-                email = "Laura@mail.com"
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-            ProfileOptionItem(title = "Mis pedidos", subtitle = "Ya tienes 12 pedidos") {
-                // Navegación a la pantalla de pedidos
+        if (isLoading) {
+            // Muestra un indicador de carga si está cargando los datos
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
-            ProfileOptionItem(title = "Mis reseñas", subtitle = "Reseñas de 4 artículos") {
-                // Navegación a la pantalla de reseñas
-            }
-            ProfileOptionItem(title = "Ajustes", subtitle = "Notificaciones, contraseña") {
-                // Navegación a la pantalla de ajustes
-            }
-            ProfileOptionItem(title = "Cerrar sesión") {
-                // Acción de cerrar sesión
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.height(16.dp))
+                ProfileHeader(
+                    imageUrl = buyer?.profilePhotoUri ?: "https://via.placeholder.com/150",
+                    name = "${buyer?.name ?: "Usuario"} ${buyer?.lastName ?: ""}",
+                    email = buyer?.email ?: "Sin correo"
+                )
+                Spacer(modifier = Modifier.height(32.dp))
+                ProfileOptionItem(
+                    title = "Mis pedidos",
+                    subtitle = "Historial de tus pedidos"
+                ) {
+                    // Navegación a la pantalla de historial de pedidos
+                    navController?.navigate(Routes.OrderHistoryBuyer)
+                }
+                ProfileOptionItem(
+                    title = "Mis reseñas",
+                    subtitle = "Tus opiniones y valoraciones"
+                ) {
+                    // Navegación a la pantalla de reseñas
+                }
+                ProfileOptionItem(
+                    title = "Ajustes",
+                    subtitle = "Notificaciones, contraseña"
+                ) {
+                    // Navegación a la pantalla de ajustes
+                }
+                ProfileOptionItem(
+                    title = "Cerrar sesión"
+                ) {
+                    // Acción de cerrar sesión
+                    sharedUserViewModel.clearBuyerData()
+                    navController?.navigate(Routes.Login) // Redirige a la pantalla de inicio de sesión
+                }
             }
         }
     }
@@ -92,8 +127,22 @@ fun ProfileHeader(imageUrl: String, name: String, email: String) {
                 .clip(CircleShape)
         )
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = name, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-        Text(text = email, style = MaterialTheme.typography.bodyLarge, color = Color.Gray)
+        Text(
+            text = name,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 8.dp),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Text(
+            text = email,
+            style = MaterialTheme.typography.bodyLarge,
+            color = Color.Gray,
+            modifier = Modifier.padding(horizontal = 8.dp),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 
@@ -108,26 +157,25 @@ fun ProfileOptionItem(title: String, subtitle: String? = null, onClick: () -> Un
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold
+                )
                 subtitle?.let {
-                    Text(text = it, style = MaterialTheme.typography.bodyLarge, color = Color.Gray)
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Color.Gray
+                    )
                 }
             }
             Icon(
-                imageVector = Icons.Default.AddCircle,
+                imageVector = Icons.Default.ArrowDropDown,
                 contentDescription = "Abrir",
                 tint = Color.Gray
             )
         }
         Divider(color = Color.LightGray)
     }
-}
-
-@Preview(showBackground = true, widthDp = 360, heightDp = 800)
-@Composable
-fun UserProfileScreenPreview() {
-    // Simulamos el NavController para la previsualización
-    val navController = rememberNavController()
-
-    UserProfileScreenBuyer(navController = navController,sharedUserViewModel=SharedUserViewModel())
 }

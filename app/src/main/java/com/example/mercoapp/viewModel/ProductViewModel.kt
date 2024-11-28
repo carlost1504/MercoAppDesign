@@ -62,7 +62,10 @@ open class ProductViewModel(
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                // Directamente agrega el producto al vendedor
+                // Guarda el producto en la colección global de productos
+                productRepo.createProduct(product)
+
+                // Actualiza el vendedor para incluir el producto
                 userRepo.addProductToSeller(sellerId, product)
 
                 // Si todo salió bien, notifica éxito
@@ -85,20 +88,27 @@ open class ProductViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             isLoading.postValue(true)
             try {
-                val products = productRepo.getProducts().filter { it.isActive } // Filtra productos activos
+                val products = productRepo.getProducts()
+
+                // Filtrar productos activos
+                val activeProducts = products.filter { it.isActive }
+                Log.d("ProductViewModel", "Productos activos: $activeProducts")
+
+                // Actualizar LiveData en el hilo principal
                 withContext(Dispatchers.Main) {
-                    sellerProducts.postValue(products) // Reutilizamos `sellerProducts` para guardar productos globales
+                    sellerProducts.postValue(activeProducts)
                 }
             } catch (e: Exception) {
                 Log.e("ProductViewModel", "Error al obtener productos activos: ${e.localizedMessage}")
                 withContext(Dispatchers.Main) {
-                    sellerProducts.postValue(emptyList()) // En caso de error, lista vacía
+                    sellerProducts.postValue(emptyList())
                 }
             } finally {
                 isLoading.postValue(false)
             }
         }
     }
+
 
     /**
      * Obtener un producto por su ID.

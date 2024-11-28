@@ -31,11 +31,11 @@ fun StoreScreenBuyer(
     productViewModel: ProductViewModel = viewModel(),
     sharedUserViewModel: SharedUserViewModel
 ) {
-    // Observa los productos activos
+    // Observa los productos activos desde el ViewModel de productos
     val products by productViewModel.sellerProducts.observeAsState(emptyList())
     val isLoading by productViewModel.isLoading.observeAsState(false)
 
-    // Carga productos activos al inicio
+    // Carga los productos activos al inicio
     LaunchedEffect(Unit) {
         productViewModel.getAllActiveProducts()
     }
@@ -70,19 +70,30 @@ fun StoreScreenBuyer(
                 CircularProgressIndicator()
             }
         } else {
-            Column(
-                modifier = Modifier
-                    .padding(padding)
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
-                GreetingSection(sharedUserViewModel = sharedUserViewModel)
-                SearchBar()
-                ProductGrid(products)
+            if (products.isEmpty()) {
+                // Mostrar mensaje si no hay productos disponibles
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("No hay productos disponibles.")
+                }
+            } else {
+                // Mostrar productos usando tu componente ProductGrid
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                ) {
+                    ProductGrid(products = products)
+                }
             }
         }
     }
 }
+
 
 
 

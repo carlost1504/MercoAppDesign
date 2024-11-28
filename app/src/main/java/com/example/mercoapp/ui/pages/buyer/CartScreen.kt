@@ -46,7 +46,7 @@ fun CartScreenBuyer(
             )
         },
         bottomBar = {
-            BottomNavigationBarrBuyer(navController, "Perfil", sharedUserViewModel)
+            BottomNavigationBarrBuyer(navController, "Carrito", sharedUserViewModel)
         }
     ) { padding ->
         Column(

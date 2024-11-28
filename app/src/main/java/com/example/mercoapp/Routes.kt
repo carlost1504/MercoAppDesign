@@ -19,6 +19,7 @@ object Routes {
     const val OrderConfirmationBuyer = "order_confirmation_buyer"
     const val StoreBuyer = "store_buyer"
     const val UserProfileBuyer = "user_profile_buyer"
+    const val SigupBuyer= "SigupBuyer"
 
     // Seller
     const val HomeSeller = "homeSeller"
